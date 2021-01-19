@@ -1,0 +1,17 @@
+{
+  "name": "resource_monitor",
+  "version": "1.0.0",
+  "description": "[x] run task every minute\r  [x] Timestamp of when it has been logged\r  [x] Number of CPU cores\r  [x] CPU details, frequency\r  [] Current CPU usage of each core\r  [x] RAM Usage done\r  [x] Total RAM amoun\r  [x] SWAP amount\r  [x] SWAP available\r  [x] Current BANDWITH USAGE up/down\r  [x] Uptime of the machine\r  [x] Disks\r  [x] Partitions, available space on each\r  [x] Uptime of the program itself\r  [x] List of iptables rules\r  [x] Ports currently running\r  [x] IPs connected to the machine currently and their activity\r  [x] List of users\r  [] Does the PC have INTERNET?\r  [] create a separate json file everytime script runs",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run start-watch & npm run wp-server",
+    "logger": "node index.js",
+    "server": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "systeminformation": "^4.34.2",
+    "ws": "^7.4.2"
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "name": "resource monitor",
+    "description": "monitor server status",
+    "servers": {
+        "server_1": {
+            "server_name": "server-1",
+            "ip": "127.0.0.1",
+            "port": "5000",
+            "url": "ws://localhost:5000"
+        }
+    }
+}

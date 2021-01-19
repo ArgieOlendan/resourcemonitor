@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="main.css">
+    <title>Resource Monitor</title>
+</head>
+
+<body>
+    <ul class="nav nav-tabs">
+
+        <li class="nav-item">
+
+            <a class="nav-link" href="">servers</a>
+
+        </li>
+
+        <li class="nav-item">
+            
+            <a class="nav-link" href="">setting</a>
+
+        </li>
+
+    </ul>
+
+    <div class="float-container">
+
+        <div class="float-child server-data">
+
+            <div class="server-1 server">
+
+                <strong class="sever-name">SERVER-1</strong>
+
+                <span class="server-status"></span>
+
+                <span>
+                    <strong>statistics:</strong>
+                    <div class="server-statistics">
+                        <div class="card">
+
+                            <div class="card-body">
+
+                              <h5 class="card-title">BANDWIDTH:</h5>
+
+                              <ul class="bandwith-data"></ul>
+
+                            </div>
+
+                          </div>
+                    </div>
+                </span>
+
+                <span>
+                    <strong>logs:</strong>
+                    <ul class="server-logs"></ul>
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="float-child">
+
+            <textarea cols="100" rows="30" class="log-data"></textarea>
+
+        </div>
+
+    </div>
+
+</body>
+
+<script src="resource_monitor.js"></script>
+
+</html>

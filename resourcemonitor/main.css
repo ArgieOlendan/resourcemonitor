@@ -1,0 +1,28 @@
+textarea {
+  resize: none;
+}
+
+.server-data {
+  display: flex;
+}
+
+.float-child {
+  float: left;
+  padding: 20px;
+}
+
+.server {
+  border: 2px solid #000000;
+  padding: 10px;
+  margin-left: 10px;
+}
+
+ul li {
+  cursor: pointer;
+  list-style-type: none;
+  padding: 2px;
+}
+
+ul li:hover {
+  color: #1c9bd1;
+}
