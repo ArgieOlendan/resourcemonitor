@@ -11,21 +11,6 @@
 </head>
 
 <body>
-    <ul class="nav nav-tabs">
-
-        <li class="nav-item">
-
-            <a class="nav-link" href="">servers</a>
-
-        </li>
-
-        <li class="nav-item">
-            
-            <a class="nav-link" href="">setting</a>
-
-        </li>
-
-    </ul>
 
     <div class="float-container">
 
@@ -113,22 +98,43 @@
 
                     </div>
 
+                    <div class="card">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">Uptime:</h5>
+
+                            <ul class="uptime-data"></ul>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <span>
-                    <strong>logs:</strong>
+                <div>
 
-                    <ul class="server-logs"></ul>
+                    <div class="card">
+                        
+                        <div class="card-body">
 
-                </span>
+                            <h5 class="card-title">LOGS:</h5>
+
+                            <ul class="server-logs"></ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
-
+            
         </div>
-
+        
         <div class="float-child">
 
-            <textarea cols="100" rows="30" class="log-data"></textarea>
+            <textarea cols="100" rows="30" class="log-data form-control"></textarea>
 
         </div>
 
@@ -136,6 +142,7 @@
 
 </body>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
 <script src="resource_monitor.js"></script>
 
 </html>
