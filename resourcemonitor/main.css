@@ -1,28 +1,48 @@
+.main {
+  display: flex;
+}
+
+.process {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.server {
+  border: 2px dashed #000000;
+  padding: 10px;
+}
+
+.settings {
+  border: 2px dashed #000000;
+  padding: 10px;
+}
+
+.card {
+  margin: 10px;
+  box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+}
+
 textarea {
   resize: none;
 }
 
-.server-data {
+.section-1 {
   display: flex;
 }
 
-.float-child {
-  float: left;
-  padding: 20px;
+.section-2 {
+  display: flex;
 }
 
-.server {
-  border: 2px solid #000000;
-  padding: 10px;
-  margin-left: 10px;
+.section-3 {
+  display: flex;
 }
 
-ul li {
+ul.server-logs li {
   cursor: pointer;
-  list-style-type: none;
   padding: 2px;
 }
 
-ul li:hover {
+ul.server-logs li:hover {
   color: #1c9bd1;
 }

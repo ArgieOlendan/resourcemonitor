@@ -12,115 +12,168 @@
 
 <body>
 
-    <div class="float-container">
+    <div class="main">
 
-        <div class="float-child server-data">
+        <div class="left-panel">
 
-            <div class="server-1 server">
+            <nav class="nav flex-column">
 
-                <strong class="sever-name">SERVER-1</strong>
+                <a class="nav-link" href="#">Settings</a>
 
-                <span class="server-status"></span>
+                <div class="servers">
 
-                <strong>statistics:</strong>
+                    <strong>Servers</strong>
 
-                <div class="server-statistics">
+                    <ul>
 
-                    <div class="card">
+                        <li>
+                            
+                            <a class="nav-link" href="#">Server1</a>
 
-                        <div class="card-body">
+                        </li>
 
-                            <h5 class="card-title">BANDWIDTH:</h5>
+                    </ul>
 
-                            <ul class="bandwith-data"></ul>
+                </div>
 
-                        </div>
+            </nav>
+        </div>
 
-                    </div>
+        <div class="right-panel">
 
-                    <div class="card">
+            <div class="float-child server-data">
 
-                        <div class="card-body">
+                <div class="settings">
 
-                            <h5 class="card-title">CPU:</h5>
+                    <div class="form-group">
 
-                            <ul class="cpu-data"></ul>
+                        <label for="interval">Log interval:</label>
 
-                        </div>
+                        <input type="number" class="" id="interval">
 
-                    </div>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <h5 class="card-title">DISK:</h5>
-
-                            <ul class="disk-data"></ul>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <h5 class="card-title">MEMORY:</h5>
-
-                            <ul class="memory-data"></ul>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <h5 class="card-title">PROCESS:</h5>
-
-                            <ul class="process-data"></ul>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <h5 class="card-title">USERS:</h5>
-
-                            <ul class="users-data"></ul>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <h5 class="card-title">Uptime:</h5>
-
-                            <ul class="uptime-data"></ul>
-
-                        </div>
+                        <button class="btn btn-primary">Save</button>
 
                     </div>
 
                 </div>
 
-                <div>
+                <div class="server-1 server">
 
-                    <div class="card">
-                        
-                        <div class="card-body">
+                    <strong class="sever-name">SERVER-1</strong>
 
-                            <h5 class="card-title">LOGS:</h5>
+                    <span class="server-status"></span>
 
-                            <ul class="server-logs"></ul>
+                    <strong>statistics:</strong>
+
+                    <div class="server-statistics">
+
+                        <div class="section-1">
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">CPU:</h5>
+
+                                    <ul class="cpu-data"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">DISK:</h5>
+
+                                    <ul class="disk-data card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">MEMORY:</h5>
+
+                                    <ul class="memory-data card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">USERS:</h5>
+
+                                    <ul class="users-data card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">Uptime:</h5>
+
+                                    <ul class="uptime-data card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="section-2">
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">BANDWIDTH:</h5>
+
+                                    <ul class="bandwith-data card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">LOGS:</h5>
+
+                                    <ul class="server-logs card-text"></ul>
+
+                                </div>
+
+                            </div>
+
+                            <textarea cols="50" rows="20" class="log-data card-text form-control" style="margin-left: 0px; margin-right: 0px; width: 551px;"></textarea>
+
+                        </div>
+
+                        <div class="section-3">
+
+                            <div class="card">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">PROCESS:</h5>
+
+                                    <div class="process-data card-text process"></div>
+
+                                </div>
+
+                            </div>
 
                         </div>
 
@@ -129,12 +182,6 @@
                 </div>
 
             </div>
-            
-        </div>
-        
-        <div class="float-child">
-
-            <textarea cols="100" rows="30" class="log-data form-control"></textarea>
 
         </div>
 
@@ -142,7 +189,10 @@
 
 </body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+    integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+    crossorigin="anonymous"></script>
+    
 <script src="resource_monitor.js"></script>
 
 </html>
