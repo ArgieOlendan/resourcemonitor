@@ -109,7 +109,7 @@ wss.on("connection", (ws) => {
 var execIpRules = async () => {
 	var end;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -124,7 +124,7 @@ var execIpRules = async () => {
 				console.error(err.message);
 			}
 
-			end = new Date();
+			end = new Date().toISOString();
 
 			resolve();
 		});
@@ -135,21 +135,21 @@ var execIpRules = async () => {
 			start,
 			end,
 			status,
-			time_stamp: new Date()
+			time_stamp: new Date().toISOString()
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 }
 
 var execNstat = async () => {
 	var end;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -173,14 +173,14 @@ var execNstat = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 };
 
@@ -189,7 +189,7 @@ var bandwidth = async () => {
 	var bandwith_data;
 	var end;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -231,9 +231,9 @@ var bandwidth = async () => {
 							data.url = url;
 
 							// Convert to UTC
-							data.start = data.start;
+							data.start = data.start.toISOString();
 
-							data.end = data.end;
+							data.end = data.end.toISOString();
 						});
 
 						return data;
@@ -244,7 +244,7 @@ var bandwidth = async () => {
 
 				status = true
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -253,7 +253,7 @@ var bandwidth = async () => {
 
 				console.error(err.message);
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			});
@@ -266,14 +266,14 @@ var bandwidth = async () => {
 			start,
 			end,
 			status,
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			status,
 			start,
 			end,
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		}
 };
 
@@ -281,7 +281,7 @@ var cpus = async () => {
 	var cpu_data;
 	var end;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false
 
 	await new Promise((resolve) => {
@@ -291,7 +291,7 @@ var cpus = async () => {
 
 				status = true
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -300,7 +300,7 @@ var cpus = async () => {
 
 				console.error(err.message);
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			});
@@ -312,14 +312,14 @@ var cpus = async () => {
 			start,
 			end, 
 			status,
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			start,
 			end,
 			status,
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 };
 
@@ -327,7 +327,7 @@ var disk = async () => {
 	var disk_data;
 	var end;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -342,7 +342,7 @@ var disk = async () => {
 
 				status = true;
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -351,22 +351,22 @@ var disk = async () => {
 
 				console.error(err.message);
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			});
 	});
 
 	return status ?
-		{ data: disk_data, start, end, status, time_stamp: new Date() }
-		: { status, message, time_stamp: new Date() };
+		{ data: disk_data, start, end, status, time_stamp: new Date().toISOString() }
+		: { status, message, time_stamp: new Date().toISOString() };
 };
 
 var memory = async () => {
 	var end;
 	var memory_data;
 	var message;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -376,7 +376,7 @@ var memory = async () => {
 
 				status = true;
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -385,7 +385,7 @@ var memory = async () => {
 
 				console.error(err.message);
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			});
@@ -397,14 +397,14 @@ var memory = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 };
 
@@ -416,7 +416,7 @@ var process = async () => {
 	var end;
 	var message;
 	var processes_data;
-	var start = new Date();
+	var start = new Date().toISOString();
 	var status = false;
 
 	await new Promise((resolve) => {
@@ -426,7 +426,7 @@ var process = async () => {
 
 				status = true;
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -445,14 +445,14 @@ var process = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			start,
 			end,
 			status,
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 };
 
@@ -474,7 +474,7 @@ var users = async () => {
 
 				status = true;
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			})
@@ -484,7 +484,7 @@ var users = async () => {
 
 				console.error(err.message);
 
-				end = new Date();
+				end = new Date().toISOString();
 
 				resolve();
 			});
@@ -496,14 +496,14 @@ var users = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date() 
+			time_stamp: new Date().toISOString() 
 		};
 };
 
