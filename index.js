@@ -1,12 +1,77 @@
 var _fs = require("fs");
 var _process = require("process");
 var { exec } = require("child_process");
-var si = require("systeminformation");
-var path = require("path");
 var http = require("http");
+var _path = require("path");
+var si = require("systeminformation");
+var WebSocket = require('ws');
 
+var logsPath = "./logs"
 var URLs = ["http://google.com", "http://duckduckgo.com"];
+var wss = new WebSocket.Server({ port: 5000 });
 
+// Server
+var getLogs = () => {
+    try {
+        let logs = [];
+
+        let files = _fs.readdirSync(logsPath, (err, fileNames) => { return fileNames });
+
+        files.forEach((file) => {
+            let fileName = { file_name: file }
+
+            let content = _fs.readFileSync(logsPath + `/${file}`, "utf-8", (err, fileData) => { return fileData })
+
+            let fileData = Object.assign({}, fileName, JSON.parse(content));
+
+            logs.push(fileData);
+        });
+
+        return logs;
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+var getServerStatistics = () => {
+    try {
+        let files = _fs.readdirSync(logsPath, (err, fileNames) => { return fileNames });
+
+        let logfile = files.pop();
+
+        let content = _fs.readFileSync(logsPath + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+
+        return content;
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+wss.on("connection", (ws) => {
+    ws.on("message", (message) => {
+        try {
+            if (message == "getLogs") {
+                let logs = getLogs();
+
+                ws.send(JSON.stringify(logs));
+            }
+            else if (message == "getServerStats") {
+                let serverStats = getServerStatistics();
+                
+                ws.send(serverStats);
+            } else {
+                ws.send("");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    });
+});
+
+
+// logging
 // Executions
 var execIpRules = async () => {
 	let status = false;
@@ -298,8 +363,8 @@ var run = async () => {
 			await sleep(ms);
 
 			const now = new Date();
-			var fileName = `log-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDay()}-${now.getHours()}-${now.getMinutes()}.json`;
-			var filePath = path.join(__dirname, "/logs/", fileName);
+			var fileName = `log-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${now.getMinutes()}.json`;
+			var filePath = _path.join(__dirname, "/logs/", fileName);
 
 			var stats = await getStats();
 
