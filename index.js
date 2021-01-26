@@ -6,68 +6,95 @@ var _path = require("path");
 var si = require("systeminformation");
 var WebSocket = require('ws');
 
-var logsPath = "./logs"
-var URLs = ["http://google.com", "http://duckduckgo.com"];
-var wss = new WebSocket.Server({ port: 5000 });
+var config = {
+	logs_cache: [],
+	port: 5000,
+	network_test_URLs: ["http://google.com",
+		"http://duckduckgo.com"],
+	logs_path: "./logs"
+};
+
+var wss = new WebSocket.Server({ port: config.port });
 
 // Server
 var getLogs = () => {
-    try {
-        let logs = [];
+	try {
+		let logs = [];
 
-        let files = _fs.readdirSync(logsPath, (err, fileNames) => { return fileNames });
+		let files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 
-        files.forEach((file) => {
-            let fileName = { file_name: file }
+		if (files.length) {
+			files.forEach((file) => {
+				let value = config.logs_cache.filter((val) => {
+					return val.file_name.includes(file);
+				});
 
-            let content = _fs.readFileSync(logsPath + `/${file}`, "utf-8", (err, fileData) => { return fileData })
+				console.log(value)
 
-            let fileData = Object.assign({}, fileName, JSON.parse(content));
+				if (value.length) {
+					value.forEach(val => {
+						logs.push(val);
+					});
+					
+				} else {
+					let fileName = { file_name: file }
 
-            logs.push(fileData);
-        });
+					let content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData })
 
-        return logs;
+					let fileData = Object.assign({}, fileName, JSON.parse(content));
 
-    } catch (err) {
-        console.error(err);
-    }
+					config.logs_cache.push(fileData);
+
+					logs.push(fileData);
+				}
+			});
+		}
+
+		return logs;
+
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 var getServerStatistics = () => {
-    try {
-        let files = _fs.readdirSync(logsPath, (err, fileNames) => { return fileNames });
+	try {
+		let files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 
-        let logfile = files.pop();
+		let logfile = files.pop();
 
-        let content = _fs.readFileSync(logsPath + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+		let content;
 
-        return content;
+		if (logfile) {
+			content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+		}
 
-    } catch (err) {
-        console.error(err);
-    }
+		return content;
+
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 wss.on("connection", (ws) => {
-    ws.on("message", (message) => {
-        try {
-            if (message == "getLogs") {
-                let logs = getLogs();
+	ws.on("message", (message) => {
+		try {
+			if (message == "getLogs") {
+				let logs = getLogs();
 
-                ws.send(JSON.stringify(logs));
-            }
-            else if (message == "getServerStats") {
-                let serverStats = getServerStatistics();
-                
-                ws.send(serverStats);
-            } else {
-                ws.send("");
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    });
+				ws.send(JSON.stringify(logs));
+			}
+			else if (message == "getServerStats") {
+				let serverStats = getServerStatistics();
+
+				ws.send(serverStats);
+			} else {
+				ws.send("");
+			}
+		} catch (err) {
+			console.error(err);
+		}
+	});
 });
 
 
@@ -92,7 +119,7 @@ var execIpRules = async () => {
 		});
 	})
 
-	return status ? { status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 }
 
 var execNstat = async () => {
@@ -113,7 +140,7 @@ var execNstat = async () => {
 		});
 	})
 
-	return status ? { status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 };
 
 // File Data
@@ -133,7 +160,7 @@ var bandwidth = async () => {
 				bandwith_data = data;
 
 				if (bandwith_data && bandwith_data[0].operstate === "up") {
-					let netCheckData = URLs.map((url) => {
+					let netCheckData = config.network_test_URLs.map((url) => {
 						const options = {
 							timeout: 3000
 						}
@@ -142,10 +169,10 @@ var bandwidth = async () => {
 
 						data.start = new Date();
 
-						new Promise((resolve) =>{
+						new Promise((resolve) => {
 							let req = http.get(url, () => {
 								resolve();
-							 });
+							});
 
 							req.setTimeout(options.timeout, () => {
 								timeoutFlag = true;
@@ -159,6 +186,11 @@ var bandwidth = async () => {
 							data.total = timeoutFlag ? 'request timeout' : (data.end - data.start);
 
 							data.url = url;
+
+							// Convert to UTC
+							data.start = data.start.toISOString();
+
+							data.end = data.end.toISOString();
 						});
 
 						return data;
@@ -181,7 +213,7 @@ var bandwidth = async () => {
 
 	})
 
-	return status ? { data: bandwith_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() }
+	return status ? { data: bandwith_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() }
 };
 
 var cpus = async () => {
@@ -238,7 +270,7 @@ var disk = async () => {
 			});
 	});
 
-	return status ? { data: disk_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { data: disk_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 };
 
 var memory = async () => {
@@ -264,7 +296,7 @@ var memory = async () => {
 			});
 	});
 
-	return status ? { data: memory_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { data: memory_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 };
 
 var machineUptime = () => {
@@ -294,7 +326,7 @@ var process = async () => {
 			});
 	});
 
-	return status ? { data: processes_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { data: processes_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 };
 
 var scriptRunTime = () => {
@@ -315,16 +347,17 @@ var users = async () => {
 
 				resolve();
 			})
-			.catch((err) => {showServerErrorStatus
+			.catch((err) => {
+				showServerErrorStatus
 				message = formatStr(err.message);
 
 				console.error(err.message);
 
-				resolve(); 
+				resolve();
 			});
 	})
 
-	return status ? { data: user_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? { data: user_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
 };
 
 // Get all data
@@ -358,12 +391,12 @@ var getStats = async () => {
 var run = async () => {
 	while (true) {
 		try {
-			const ms = 5000;
+			const ms = 60000;
 
 			await sleep(ms);
 
 			const now = new Date();
-			var fileName = `log-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${now.getMinutes()}.json`;
+			var fileName = `log-${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}-${now.getUTCHours()}-${now.getUTCMinutes()}.json`;
 			var filePath = _path.join(__dirname, "/logs/", fileName);
 
 			var stats = await getStats();

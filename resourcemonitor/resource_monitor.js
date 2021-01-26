@@ -229,13 +229,12 @@ let createMemoryData = (data, server_name) => {
 
 let createCPUProcessData = (data, server_name) => {
     try {
-        let processElement = document.querySelector(`.${server_name} ul.process-data`);
-
+        let processElement = document.querySelector(`.${server_name} .process-data`);
+        let ulElement = document.createElement("ul");
         let processData = data.process.data.list;
 
         processData.forEach(d => {
             let arr = [
-                ` `,
                 `command: ${d.command}`,
                 `mem_rss: ${d.mem_rss}`,
                 `mem_vsz: ${d.mem_vsz}`,
@@ -260,7 +259,9 @@ let createCPUProcessData = (data, server_name) => {
 
                 li.innerHTML += d;
 
-                processElement.appendChild(li);
+                ulElement.appendChild(li);
+
+                processElement.appendChild(ulElement);
             });
         });
 
@@ -275,23 +276,25 @@ let createUsersData = (data, server_name) => {
 
         let usersData = data.users;
 
-        usersData.forEach(d => {
-            let arr = [
-                `user: ${d.user}`,
-                `tty: ${d.tty}`,
-                `time_stamp: ${d.date + " " + d.time}`,
-                `ip: ${d.ip}`,
-                `command: ${d.command}`,
-            ];
-
-            arr.forEach(d => {
-                let li = document.createElement("li");
-
-                li.innerHTML += d;
-
-                usersElement.appendChild(li);
+        if (usersData.length) {
+            usersData.forEach(d => {
+                let arr = [
+                    `user: ${d.user}`,
+                    `tty: ${d.tty}`,
+                    `time_stamp: ${d.date + " " + d.time}`,
+                    `ip: ${d.ip}`,
+                    `command: ${d.command}`,
+                ];
+    
+                arr.forEach(d => {
+                    let li = document.createElement("li");
+    
+                    li.innerHTML += d;
+    
+                    usersElement.appendChild(li);
+                });
             });
-        });
+        }
 
     } catch (err) {
         console.error(err);
