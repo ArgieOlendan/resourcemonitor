@@ -4,14 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run start-watch & npm run wp-server",
-    "logger": "node index.js",
-    "server": "node server.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-cache": "^5.1.2",
     "systeminformation": "^4.34.2",
     "ws": "^7.4.2"
   }
