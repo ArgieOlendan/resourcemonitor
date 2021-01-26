@@ -11,7 +11,8 @@ var config = {
 	port: 5000,
 	network_test_URLs: ["http://google.com",
 		"http://duckduckgo.com"],
-	logs_path: "./logs"
+	logs_path: "./logs",
+	max_logs_size: 10000000 //10mb
 };
 
 var wss = new WebSocket.Server({ port: config.port });
@@ -19,29 +20,28 @@ var wss = new WebSocket.Server({ port: config.port });
 // Server
 var getLogs = () => {
 	try {
-		let logs = [];
+		var logs = [];
 
-		let files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 
 		if (files.length) {
 			files.forEach((file) => {
-				let value = config.logs_cache.filter((val) => {
+				var value = config.logs_cache.filter((val) => {
 					return val.file_name.includes(file);
 				});
 
-				console.log(value)
-
 				if (value.length) {
+					console.log(value.length);
 					value.forEach(val => {
 						logs.push(val);
 					});
 					
 				} else {
-					let fileName = { file_name: file }
+					var fileName = { file_name: file }
 
-					let content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData })
+					var content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData })
 
-					let fileData = Object.assign({}, fileName, JSON.parse(content));
+					var fileData = Object.assign({}, fileName, JSON.parse(content));
 
 					config.logs_cache.push(fileData);
 
@@ -59,17 +59,22 @@ var getLogs = () => {
 
 var getServerStatistics = () => {
 	try {
-		let files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		if (config.logs_cache.length) {
+			return JSON.stringify(config.logs_cache.pop());
 
-		let logfile = files.pop();
-
-		let content;
-
-		if (logfile) {
-			content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+		} else {
+			var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+	
+			var logfile = files.pop();
+	
+			var content;
+	
+			if (logfile) {
+				content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+			}
+	
+			return content;
 		}
-
-		return content;
 
 	} catch (err) {
 		console.error(err);
@@ -80,12 +85,12 @@ wss.on("connection", (ws) => {
 	ws.on("message", (message) => {
 		try {
 			if (message == "getLogs") {
-				let logs = getLogs();
+				var logs = getLogs();
 
 				ws.send(JSON.stringify(logs));
 			}
 			else if (message == "getServerStats") {
-				let serverStats = getServerStatistics();
+				var serverStats = getServerStatistics();
 
 				ws.send(serverStats);
 			} else {
@@ -101,8 +106,8 @@ wss.on("connection", (ws) => {
 // logging
 // Executions
 var execIpRules = async () => {
-	let status = false;
-	let message;
+	var status = false;
+	var message;
 
 	await new Promise((resolve) => {
 		exec("iptables -L", (err, stdout) => {
@@ -123,8 +128,8 @@ var execIpRules = async () => {
 }
 
 var execNstat = async () => {
-	let status = false;
-	let message;
+	var status = false;
+	var message;
 
 	await new Promise((resolve) => {
 		exec("netstat -an", (err, stdout) => {
@@ -145,9 +150,9 @@ var execNstat = async () => {
 
 // File Data
 var bandwidth = async () => {
-	let status = false;
-	let message;
-	let bandwith_data;
+	var status = false;
+	var message;
+	var bandwith_data;
 
 	await new Promise((resolve) => {
 		si.networkStats()
@@ -160,17 +165,17 @@ var bandwidth = async () => {
 				bandwith_data = data;
 
 				if (bandwith_data && bandwith_data[0].operstate === "up") {
-					let netCheckData = config.network_test_URLs.map((url) => {
-						const options = {
+					var netCheckData = config.network_test_URLs.map((url) => {
+						var options = {
 							timeout: 3000
 						}
-						let timeoutFlag = false;
-						let data = {};
+						var timeoutFlag = false;
+						var data = {};
 
 						data.start = new Date();
 
 						new Promise((resolve) => {
-							let req = http.get(url, () => {
+							var req = http.get(url, () => {
 								resolve();
 							});
 
@@ -217,9 +222,9 @@ var bandwidth = async () => {
 };
 
 var cpus = async () => {
-	let status = false
-	let cpu_data;
-	let message;
+	var status = false
+	var cpu_data;
+	var message;
 
 	await new Promise((resolve) => {
 		si.cpu()
@@ -243,9 +248,9 @@ var cpus = async () => {
 };
 
 var disk = async () => {
-	let status = false;
-	let message;
-	let disk_data;
+	var status = false;
+	var message;
+	var disk_data;
 
 	await new Promise((resolve) => {
 		si.fsSize()
@@ -274,9 +279,9 @@ var disk = async () => {
 };
 
 var memory = async () => {
-	let status = false;
-	let message;
-	let memory_data;
+	var status = false;
+	var message;
+	var memory_data;
 
 	await new Promise((resolve) => {
 		si.mem()
@@ -304,9 +309,9 @@ var machineUptime = () => {
 };
 
 var process = async () => {
-	let status = false;
-	let message;
-	let processes_data;
+	var status = false;
+	var message;
+	var processes_data;
 
 	await new Promise((resolve) => {
 		si.processes()
@@ -334,9 +339,9 @@ var scriptRunTime = () => {
 };
 
 var users = async () => {
-	let status = false;
-	let message;
-	let user_data;
+	var status = false;
+	var message;
+	var user_data;
 
 	await new Promise((resolve) => {
 		si.users()
@@ -379,7 +384,7 @@ var get = async () => {
 
 var getStats = async () => {
 	try {
-		let stats = await get();
+		var stats = await get();
 
 		return stats;
 
@@ -391,17 +396,25 @@ var getStats = async () => {
 var run = async () => {
 	while (true) {
 		try {
-			const ms = 60000;
+			var ms = 5000;
 
 			await sleep(ms);
 
-			const now = new Date();
+			var now = new Date();
+
 			var fileName = `log-${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}-${now.getUTCHours()}-${now.getUTCMinutes()}.json`;
+
 			var filePath = _path.join(__dirname, "/logs/", fileName);
 
 			var stats = await getStats();
+			
+			var exceedAllocatedMemory = Buffer.byteLength(JSON.stringify(config.logs_cache)) > config.max_logs_size;
 
-			await createLogFile(filePath, stats);
+			if (exceedAllocatedMemory) {
+				deleteLogFiles();
+			}
+
+			createLogFile(filePath, stats);
 
 		} catch (err) {
 			console.error(err);
@@ -410,9 +423,21 @@ var run = async () => {
 };
 
 // Helper Functions
-var createLogFile = async (filePath, data) => {
+var deleteLogFiles = () => {
 	try {
-		let fileData = JSON.stringify(data, null, 4);
+		// Delete the rest of existing log files
+		config.logs_cache.forEach(file => {
+			_fs.unlink(_path.join(__dirname, "/logs/", file.file_name), () => { });
+		});
+		
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+var createLogFile = (filePath, data) => {
+	try {
+		var fileData = JSON.stringify(data, null, 4);
 
 		_fs.writeFile(filePath, fileData, () => { });
 

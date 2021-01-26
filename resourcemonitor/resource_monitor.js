@@ -230,10 +230,10 @@ let createMemoryData = (data, server_name) => {
 let createCPUProcessData = (data, server_name) => {
     try {
         let processElement = document.querySelector(`.${server_name} .process-data`);
-        let ulElement = document.createElement("ul");
         let processData = data.process.data.list;
-
+        
         processData.forEach(d => {
+            let ulElement = document.createElement("ul");
             let arr = [
                 `command: ${d.command}`,
                 `mem_rss: ${d.mem_rss}`,
