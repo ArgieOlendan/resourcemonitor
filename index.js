@@ -9,8 +9,10 @@ var WebSocket = require('ws');
 var config = {
 	logs_cache: [],
 	port: 5000,
-	network_test_URLs: ["http://google.com",
-		"http://duckduckgo.com"],
+	network_test_URLs: [
+		"http://google.com",
+		"http://duckduckgo.com"
+	],
 	logs_path: "./logs",
 	max_logs_size: 10000000 //10mb
 };
@@ -31,7 +33,6 @@ var getLogs = () => {
 				});
 
 				if (value.length) {
-					console.log(value.length);
 					value.forEach(val => {
 						logs.push(val);
 					});
@@ -106,8 +107,10 @@ wss.on("connection", (ws) => {
 // logging
 // Executions
 var execIpRules = async () => {
-	var status = false;
+	var end;
 	var message;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		exec("iptables -L", (err, stdout) => {
@@ -117,27 +120,47 @@ var execIpRules = async () => {
 				status = true
 			} else {
 				message = formatStr(err.message);
+
 				console.error(err.message);
 			}
 
+			end = new Date().toISOString();
+
 			resolve();
 		});
-	})
+	});
 
-	return status ? { status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ?
+		{ 
+			start,
+			end,
+			status,
+			time_stamp: new Date().toISOString()
+		} : 
+		{ 
+			start,
+			end,
+			status, 
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 }
 
 var execNstat = async () => {
-	var status = false;
+	var end;
 	var message;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		exec("netstat -an", (err, stdout) => {
 			if (!err) {
 				console.log(stdout);
-				status = true
+
+				status = true;
 			} else {
 				message = formatStr(err.message);
+
 				console.error(err.message);
 			}
 
@@ -145,14 +168,29 @@ var execNstat = async () => {
 		});
 	})
 
-	return status ? { status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ? 
+		{ 
+			start,
+			end,
+			status, 
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status, 
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 // File Data
 var bandwidth = async () => {
-	var status = false;
-	var message;
 	var bandwith_data;
+	var end;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		si.networkStats()
@@ -206,6 +244,8 @@ var bandwidth = async () => {
 
 				status = true
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -213,18 +253,36 @@ var bandwidth = async () => {
 
 				console.error(err.message);
 
+				end = new Date().toISOString();
+
 				resolve();
 			});
 
 	})
 
-	return status ? { data: bandwith_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() }
+	return status ? 
+		{ 
+			data: bandwith_data,
+			start,
+			end,
+			status,
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			status,
+			start,
+			end,
+			message, 
+			time_stamp: new Date().toISOString() 
+		}
 };
 
 var cpus = async () => {
-	var status = false
 	var cpu_data;
+	var end;
 	var message;
+	var start = new Date().toISOString();
+	var status = false
 
 	await new Promise((resolve) => {
 		si.cpu()
@@ -233,6 +291,8 @@ var cpus = async () => {
 
 				status = true
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -240,17 +300,35 @@ var cpus = async () => {
 
 				console.error(err.message);
 
+				end = new Date().toISOString();
+
 				resolve();
 			});
 	});
 
-	return status ? { data: cpu_data, status, time_stamp: new Date() } : { status, message, time_stamp: new Date() };
+	return status ? 
+		{ 
+			data: cpu_data,
+			start,
+			end, 
+			status,
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 var disk = async () => {
-	var status = false;
-	var message;
 	var disk_data;
+	var end;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		si.fsSize()
@@ -264,6 +342,8 @@ var disk = async () => {
 
 				status = true;
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -271,17 +351,23 @@ var disk = async () => {
 
 				console.error(err.message);
 
+				end = new Date().toISOString();
+
 				resolve();
 			});
 	});
 
-	return status ? { data: disk_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ?
+		{ data: disk_data, start, end, status, time_stamp: new Date().toISOString() }
+		: { status, message, time_stamp: new Date().toISOString() };
 };
 
 var memory = async () => {
-	var status = false;
-	var message;
+	var end;
 	var memory_data;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		si.mem()
@@ -290,6 +376,8 @@ var memory = async () => {
 
 				status = true;
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -297,11 +385,27 @@ var memory = async () => {
 
 				console.error(err.message);
 
+				end = new Date().toISOString();
+
 				resolve();
 			});
 	});
 
-	return status ? { data: memory_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ? 
+		{ 
+			data: memory_data,
+			start,
+			end,
+			status, 
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status, 
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 var machineUptime = () => {
@@ -309,9 +413,11 @@ var machineUptime = () => {
 };
 
 var process = async () => {
-	var status = false;
+	var end;
 	var message;
 	var processes_data;
+	var start = new Date().toISOString();
+	var status = false;
 
 	await new Promise((resolve) => {
 		si.processes()
@@ -320,6 +426,8 @@ var process = async () => {
 
 				status = true;
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -331,7 +439,21 @@ var process = async () => {
 			});
 	});
 
-	return status ? { data: processes_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ? 
+		{ 
+			data: processes_data, 
+			start,
+			end,
+			status, 
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 var scriptRunTime = () => {
@@ -339,8 +461,10 @@ var scriptRunTime = () => {
 };
 
 var users = async () => {
-	var status = false;
+	var end;
 	var message;
+	var start = new Date();
+	var status = false;
 	var user_data;
 
 	await new Promise((resolve) => {
@@ -350,6 +474,8 @@ var users = async () => {
 
 				status = true;
 
+				end = new Date().toISOString();
+
 				resolve();
 			})
 			.catch((err) => {
@@ -358,47 +484,55 @@ var users = async () => {
 
 				console.error(err.message);
 
+				end = new Date().toISOString();
+
 				resolve();
 			});
 	})
 
-	return status ? { data: user_data, status, time_stamp: new Date().toISOString() } : { status, message, time_stamp: new Date().toISOString() };
+	return status ? 
+		{ 
+			data: user_data,
+			start,
+			end,
+			status, 
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status, 
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 // Get all data
-var get = async () => {
-	return {
-		bandwidth: await bandwidth(),
-		cpu: await cpus(),
-		disk: await disk(),
-		ip_tables: await execIpRules(),
-		memory: await memory(),
-		net_statistics: await execNstat(),
-		process: await process(),
-		script_uptime: scriptRunTime(),
-		time_stamp: new Date(),
-		machine_uptime: machineUptime(),
-		users: await users(),
-	};
-};
-
 var getStats = async () => {
 	try {
-		var stats = await get();
-
-		return stats;
-
+		return {
+			bandwidth: await bandwidth(),
+			cpu: await cpus(),
+			disk: await disk(),
+			ip_tables: await execIpRules(),
+			memory: await memory(),
+			net_statistics: await execNstat(),
+			process: await process(),
+			script_uptime: scriptRunTime(),
+			time_stamp: new Date(),
+			machine_uptime: machineUptime(),
+			users: await users(),
+		};
+		
 	} catch (err) {
 		console.error(err);
 	}
-}
+};
 
 var run = async () => {
 	while (true) {
 		try {
-			var ms = 5000;
-
-			await sleep(ms);
+			var ms = 60000;
 
 			var now = new Date();
 
@@ -407,14 +541,16 @@ var run = async () => {
 			var filePath = _path.join(__dirname, "/logs/", fileName);
 
 			var stats = await getStats();
-			
+
 			var exceedAllocatedMemory = Buffer.byteLength(JSON.stringify(config.logs_cache)) > config.max_logs_size;
 
 			if (exceedAllocatedMemory) {
 				deleteLogFiles();
 			}
-
+			
 			createLogFile(filePath, stats);
+			
+			await sleep(ms);
 
 		} catch (err) {
 			console.error(err);
