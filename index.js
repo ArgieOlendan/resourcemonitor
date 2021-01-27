@@ -82,6 +82,7 @@ var getServerStatistics = () => {
 	}
 }
 
+// Events
 wss.on("connection", (ws) => {
 	ws.on("message", (message) => {
 		try {
@@ -358,8 +359,21 @@ var disk = async () => {
 	});
 
 	return status ?
-		{ data: disk_data, start, end, status, time_stamp: new Date().toISOString() }
-		: { status, message, time_stamp: new Date().toISOString() };
+		{ 
+			data: disk_data, 
+			start, 
+			end, 
+			status, 
+			time_stamp: new Date().toISOString()
+		}
+		: 
+		{ 
+			start, 
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString()
+		};
 };
 
 var memory = async () => {
@@ -397,14 +411,14 @@ var memory = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date().toISOString() 
+			time_stamp: new Date().toISOString()
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date().toISOString() 
+			time_stamp: new Date().toISOString()
 		};
 };
 
@@ -441,11 +455,11 @@ var process = async () => {
 
 	return status ? 
 		{ 
-			data: processes_data, 
+			data: processes_data,
 			start,
 			end,
-			status, 
-			time_stamp: new Date().toISOString() 
+			status,
+			time_stamp: new Date().toISOString()
 		} : 
 		{ 
 			start,
@@ -496,14 +510,14 @@ var users = async () => {
 			start,
 			end,
 			status, 
-			time_stamp: new Date().toISOString() 
+			time_stamp: new Date().toISOString()
 		} : 
 		{ 
 			start,
 			end,
 			status, 
 			message, 
-			time_stamp: new Date().toISOString() 
+			time_stamp: new Date().toISOString()
 		};
 };
 
@@ -519,7 +533,7 @@ var getStats = async () => {
 			net_statistics: await execNstat(),
 			process: await process(),
 			script_uptime: scriptRunTime(),
-			time_stamp: new Date(),
+			time_stamp: new Date().toISOString(),
 			machine_uptime: machineUptime(),
 			users: await users(),
 		};
