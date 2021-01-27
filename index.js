@@ -1,8 +1,8 @@
-var _fs = require("fs");
-var _process = require("process");
 var { exec } = require("child_process");
-var http = require("http");
+var _fs = require("fs");
 var _path = require("path");
+var _process = require("process");
+var http = require("http");
 var si = require("systeminformation");
 var WebSocket = require('ws');
 
@@ -40,7 +40,7 @@ var getLogs = () => {
 				} else {
 					var fileName = { file_name: file }
 
-					var content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData })
+					var content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData });
 
 					var fileData = Object.assign({}, fileName, JSON.parse(content));
 
@@ -118,7 +118,7 @@ var execIpRules = async () => {
 			if (!err) {
 				console.log(stdout);
 
-				status = true
+				status = true;
 			} else {
 				message = formatStr(err.message);
 
@@ -207,7 +207,7 @@ var bandwidth = async () => {
 					var netCheckData = config.network_test_URLs.map((url) => {
 						var options = {
 							timeout: 3000
-						}
+						};
 						var timeoutFlag = false;
 						var data = {};
 
@@ -243,7 +243,7 @@ var bandwidth = async () => {
 					bandwith_data[0] = Object.assign({}, bandwith_data[0], { "network_test": netCheckData });
 				}
 
-				status = true
+				status = true;
 
 				end = new Date().toISOString();
 
@@ -275,7 +275,99 @@ var bandwidth = async () => {
 			end,
 			message, 
 			time_stamp: new Date().toISOString() 
-		}
+		};
+};
+
+var baseBoard = async () => {
+	var baseboard_data;
+	var end;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
+
+	await new Promise((resolve) => {
+		si.baseboard()
+			.then((data) => {
+				baseboard_data = data;
+
+				status = true
+
+				end = new Date().toISOString();
+
+				resolve();
+			})
+			.catch((err) => {
+				message = formatStr(err.message);
+
+				console.error(err.message);
+
+				end = new Date().toISOString();
+
+				resolve();
+			});
+	});
+
+	return status ? 
+		{ 
+			data: baseboard_data,
+			start,
+			end, 
+			status,
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
+};
+
+var bios = async () => {
+	var bios_data;
+	var end;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
+
+	await new Promise((resolve) => {
+		si.bios()
+			.then((data) => {
+				bios_data = data;
+
+				status = true
+
+				end = new Date().toISOString();
+
+				resolve();
+			})
+			.catch((err) => {
+				message = formatStr(err.message);
+
+				console.error(err.message);
+
+				end = new Date().toISOString();
+
+				resolve();
+			});
+	});
+
+	return status ? 
+		{ 
+			data: bios_data,
+			start,
+			end, 
+			status,
+			time_stamp: new Date().toISOString() 
+		} : 
+		{ 
+			start,
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 var cpus = async () => {
@@ -283,7 +375,7 @@ var cpus = async () => {
 	var end;
 	var message;
 	var start = new Date().toISOString();
-	var status = false
+	var status = false;
 
 	await new Promise((resolve) => {
 		si.cpu()
@@ -371,6 +463,52 @@ var disk = async () => {
 			start, 
 			end,
 			status,
+			message,
+			time_stamp: new Date().toISOString()
+		};
+};
+
+var graphics = async () => {
+	var end;
+	var graphics_data;
+	var message;
+	var start = new Date().toISOString();
+	var status = false;
+
+	await new Promise((resolve) => {
+		si.mem()
+			.then((data) => {
+				graphics_data = data;
+
+				status = true;
+
+				end = new Date().toISOString();
+
+				resolve();
+			})
+			.catch((err) => {
+				message = formatStr(err.message);
+
+				console.error(err.message);
+
+				end = new Date().toISOString();
+
+				resolve();
+			});
+	});
+
+	return status ? 
+		{ 
+			data: graphics_data,
+			start,
+			end,
+			status, 
+			time_stamp: new Date().toISOString()
+		} : 
+		{ 
+			start,
+			end,
+			status, 
 			message, 
 			time_stamp: new Date().toISOString()
 		};
@@ -424,6 +562,50 @@ var memory = async () => {
 
 var machineUptime = () => {
 	return si.time().uptime * 1000;
+};
+
+var os = async () => {
+	var end;
+	var message;
+	var os_data;
+	var start = new Date().toISOString();
+	var status = false;
+
+	await new Promise((resolve) => {
+		si.osInfo()
+			.then((data) => {
+				os_data = data;
+
+				status = true;
+
+				end = new Date().toISOString();
+
+				resolve();
+			})
+			.catch((err) => {
+				message = formatStr(err.message);
+
+				console.error(err.message);
+
+				resolve();
+			});
+	});
+
+	return status ? 
+		{ 
+			data: os_data,
+			start,
+			end,
+			status,
+			time_stamp: new Date().toISOString()
+		} : 
+		{ 
+			start,
+			end,
+			status,
+			message, 
+			time_stamp: new Date().toISOString() 
+		};
 };
 
 var process = async () => {
@@ -502,7 +684,7 @@ var users = async () => {
 
 				resolve();
 			});
-	})
+	});
 
 	return status ? 
 		{ 
@@ -526,12 +708,16 @@ var getStats = async () => {
 	try {
 		return {
 			bandwidth: await bandwidth(),
+			baseboard: await baseBoard(),
+			bios: await bios(),
 			cpu: await cpus(),
 			disk: await disk(),
+			graphics: await graphics(),
 			ip_tables: await execIpRules(),
 			memory: await memory(),
 			net_statistics: await execNstat(),
 			process: await process(),
+			os: await os(),
 			script_uptime: scriptRunTime(),
 			time_stamp: new Date().toISOString(),
 			machine_uptime: machineUptime(),
@@ -598,7 +784,8 @@ var createLogFile = (filePath, data) => {
 
 var formatStr = (str) => {
 	return str.replace(/\\n/g, " ");
-}
+};
+
 var sleep = (ms) => {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms);
