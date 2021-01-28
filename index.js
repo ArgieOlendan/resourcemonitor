@@ -739,9 +739,7 @@ var run = async () => {
 		try {
 			var ms = 60000;
 
-			var now = new Date();
-
-			var fileName = `log-${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}-${now.getUTCHours()}-${now.getUTCMinutes()}.json`;
+			var fileName = `log-${ new Date().toISOString().replace(/[:.]/g, "-") }.json`;
 
 			var filePath = _path.join(__dirname, "/logs/", fileName);
 
@@ -751,7 +749,7 @@ var run = async () => {
 
 			if (exceedAllocatedMemory) {
 				deleteLogFiles();
-			}
+			} 
 			
 			createLogFile(filePath, stats);
 			
