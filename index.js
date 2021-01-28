@@ -370,7 +370,7 @@ var bios = async () => {
 		};
 };
 
-var cpus = async () => {
+var cpu = async () => {
 	var cpu_data;
 	var end;
 	var message;
@@ -382,11 +382,16 @@ var cpus = async () => {
 			.then((data) => {
 				cpu_data = data;
 
-				status = true
+				si.cpuTemperature().then((cpu_temperature_data) => {
+					cpu_data = Object.assign({}, cpu_data, { "cput_temperature": cpu_temperature_data });
 
-				end = new Date().toISOString();
+					status = true
+	
+					end = new Date().toISOString();
+	
+					resolve();
+				});
 
-				resolve();
 			})
 			.catch((err) => {
 				message = formatStr(err.message);
@@ -710,14 +715,14 @@ var getStats = async () => {
 			bandwidth: await bandwidth(),
 			baseboard: await baseBoard(),
 			bios: await bios(),
-			cpu: await cpus(),
+			cpu: await cpu(),
 			disk: await disk(),
 			graphics: await graphics(),
 			ip_tables: await execIpRules(),
 			memory: await memory(),
 			net_statistics: await execNstat(),
-			process: await process(),
 			os: await os(),
+			process: await process(),
 			script_uptime: scriptRunTime(),
 			time_stamp: new Date().toISOString(),
 			machine_uptime: machineUptime(),
