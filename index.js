@@ -7,14 +7,14 @@ var si = require("systeminformation");
 var WebSocket = require('ws');
 
 var config = {
-	logs_cache: [],
+	cache: [],
 	port: 5000,
 	network_test_URLs: [
 		"http://google.com",
 		"http://duckduckgo.com"
 	],
 	logs_path: "./logs",
-	max_logs_size: 10000000 //10mb
+	max_logs_size_in_bytes: 10000000
 };
 
 var wss = new WebSocket.Server({ port: config.port });
@@ -28,7 +28,7 @@ var getLogs = () => {
 
 		if (files.length) {
 			files.forEach((file) => {
-				var value = config.logs_cache.filter((val) => {
+				var value = config.cache.filter((val) => {
 					return val.file_name.includes(file);
 				});
 
@@ -44,7 +44,7 @@ var getLogs = () => {
 
 					var fileData = Object.assign({}, fileName, JSON.parse(content));
 
-					config.logs_cache.push(fileData);
+					config.cache.push(fileData);
 
 					logs.push(fileData);
 				}
@@ -60,8 +60,8 @@ var getLogs = () => {
 
 var getServerStatistics = () => {
 	try {
-		if (config.logs_cache.length) {
-			return JSON.stringify(config.logs_cache.pop());
+		if (config.cache.length) {
+			return JSON.stringify(config.cache.pop());
 
 		} else {
 			var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
@@ -745,7 +745,7 @@ var run = async () => {
 
 			var stats = await getStats();
 
-			var exceedAllocatedMemory = Buffer.byteLength(JSON.stringify(config.logs_cache)) > config.max_logs_size;
+			var exceedAllocatedMemory = Buffer.byteLength(JSON.stringify(config.cache)) > config.max_logs_size_in_bytes;
 
 			if (exceedAllocatedMemory) {
 				deleteLogFiles();
@@ -764,10 +764,11 @@ var run = async () => {
 // Helper Functions
 var deleteLogFiles = () => {
 	try {
-		// Delete the rest of existing log files
-		config.logs_cache.forEach(file => {
+		config.cache.forEach(file => {
 			_fs.unlink(_path.join(__dirname, "/logs/", file.file_name), () => { });
 		});
+
+		config.cache = [];
 		
 	} catch (err) {
 		console.error(err);
