@@ -1,6 +1,6 @@
 // Helper functions
 let formatDate = (date) => {
-    return new moment(date).format("MMMM Do YYYY, h:mm:ss a");
+    return new moment(date).format("MM/DD/YYYY h:mm:ss a");
 };
 
 let formatFileSize = (bytes, decimalPoint) => {
@@ -39,6 +39,12 @@ let parseMillisecondToReadableTime = (duration) => {
     return portions.join(' ');
 }
 
+let precise = (val) => {
+    return Math.round(val * 100) / 100 + "%";
+};
+
+
+// data
 let createServerLogList = (data, server_name) => {
     try {
         let jsonData = data;
@@ -80,6 +86,8 @@ let createBandwidthData = (data, server_name) => {
 
         bandwidthData = bandwidthData[0];
 
+        bandwidthElement.innerHTML = "";
+
         let arr = [
             `iface: ${bandwidthData.iface}`,
             `ms: ${bandwidthData.ms}`,
@@ -99,6 +107,8 @@ let createBandwidthData = (data, server_name) => {
             `tx_bytes: ${formatFileSize(bandwidthData.tx_bytes)}`,
             `tx_dropped: ${bandwidthData.tx_dropped}`,
             `tx_sec: ${bandwidthData.tx_sec}`,
+            `start: ${formatDate(data.bandwidth.start)}`,
+            `end: ${formatDate(data.bandwidth.end)}`,
             `status: ${data.bandwidth.status}`,
             `time_stamp: ${formatDate(data.bandwidth.time_stamp)}`,
         ];
@@ -122,6 +132,8 @@ let createCPUData = (data, server_name) => {
         let cpuElement = document.querySelector(`.${server_name} ul.cpu-data`);
 
         let cpuData = data.cpu.data;
+
+        cpuElement.innerHTML = "";
 
         let arr = [
             `brand: ${cpuData.brand}`,
@@ -161,11 +173,14 @@ let createCPUData = (data, server_name) => {
 
 let createDiskData = (data, server_name) => {
     try {
-        let diskElement = document.querySelector(`.${server_name} ul.disk-data`);
+        let diskElement = document.querySelector(`.${server_name} .disk-data`);
 
         let diskData = data.disk.data;
 
+        diskElement.innerHTML = "";
+
         diskData.forEach((d) => {
+            let ul = document.createElement("ul");
             let arr = [
                 `available: ${formatFileSize(d.available)}`,
                 `fs: ${d.fs}`,
@@ -183,7 +198,9 @@ let createDiskData = (data, server_name) => {
 
                 li.innerHTML += d;
 
-                diskElement.appendChild(li);
+                ul.appendChild(li);
+
+                diskElement.appendChild(ul);
             });
         });
 
@@ -198,6 +215,8 @@ let createMemoryData = (data, server_name) => {
 
         let memoryData = data.memory.data;
 
+        memoryElement.innerHTML = "";
+
         let arr = [
             `active: ${formatFileSize(memoryData.active)}`,
             `available: ${formatFileSize(memoryData.available)}`,
@@ -209,7 +228,7 @@ let createMemoryData = (data, server_name) => {
             `swaptotal: ${formatFileSize(memoryData.swaptotal)}`,
             `swapused: ${formatFileSize(memoryData.swapused)}`,
             `total: ${formatFileSize(memoryData.total)}`,
-            `used: ${formatFileSize(memoryData.used)}`,
+            `used: ${formatFileSize(memoryData.used)}`, 
             `status: ${data.memory.status}`,
             `time_stamp: ${formatDate(data.memory.time_stamp)}`,
         ];
@@ -230,7 +249,10 @@ let createMemoryData = (data, server_name) => {
 let createCPUProcessData = (data, server_name) => {
     try {
         let processElement = document.querySelector(`.${server_name} .process-data`);
+
         let processData = data.process.data.list;
+
+        processElement.innerHTML = "";
         
         processData.forEach(d => {
             let ulElement = document.createElement("ul");
@@ -243,9 +265,9 @@ let createCPUProcessData = (data, server_name) => {
                 `params: ${d.params}`,
                 `parentPid: ${d.parentPid}`,
                 `path: ${d.path}`,
-                `pcpu: ${d.pcpu}`,
-                `pcpus: ${d.pcpus}`,
-                `pcpuu: ${d.pcpuu}`,
+                `pcpu: ${precise(d.pcpu)}`,
+                `pcpus: ${precise(d.pcpus)}`,
+                `pcpuu: ${precise(d.pcpuu)}`,
                 `pid: ${d.pid}`,
                 `pmem: ${d.pmem}`,
                 `priority: ${d.priority}`,
@@ -272,12 +294,15 @@ let createCPUProcessData = (data, server_name) => {
 
 let createUsersData = (data, server_name) => {
     try {
-        let usersElement = document.querySelector(`.${server_name} ul.users-data`);
-
-        let usersData = data.users;
-
+        let usersElement = document.querySelector(`.${server_name} .users-data`);
+        
+        let usersData = data.users.data;
+        
+        usersElement.innerHTML = "";
+        
         if (usersData.length) {
             usersData.forEach(d => {
+                let ul = document.createElement("ul");
                 let arr = [
                     `user: ${d.user}`,
                     `tty: ${d.tty}`,
@@ -285,17 +310,26 @@ let createUsersData = (data, server_name) => {
                     `ip: ${d.ip}`,
                     `command: ${d.command}`,
                 ];
-    
+                
                 arr.forEach(d => {
                     let li = document.createElement("li");
-    
+                    
                     li.innerHTML += d;
-    
-                    usersElement.appendChild(li);
+                    
+                    ul.appendChild(li);
+                    
+                    usersElement.appendChild(ul);
                 });
             });
+        } else {
+            let span = document.createElement("span");
+            
+            span.innerText = "No users!"
+
+            usersElement.appendChild(span);
         }
 
+        
     } catch (err) {
         console.error(err);
     }
@@ -304,6 +338,8 @@ let createUsersData = (data, server_name) => {
 let createUptimeData = (data, server_name) => {
     try {
         let uptimeElement = document.querySelector(`.${server_name} ul.uptime-data`);
+
+        uptimeElement.innerHTML = "";
 
         let arr = [
             `machine_uptime: ${parseMillisecondToReadableTime(data.machine_uptime)}`,

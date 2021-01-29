@@ -104,7 +104,6 @@ wss.on("connection", (ws) => {
 	});
 });
 
-
 // logging
 // Executions
 var execIpRules = async () => {
