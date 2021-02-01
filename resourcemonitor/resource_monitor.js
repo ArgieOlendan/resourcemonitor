@@ -219,7 +219,6 @@ let createMemoryData = (data, server_name) => {
 
         let arr = [
             `active: ${formatFileSize(memoryData.active)}`,
-            `available: ${formatFileSize(memoryData.available)}`,
             `buffcache: ${formatFileSize(memoryData.buffcache)}`,
             `buffers: ${formatFileSize(memoryData.buffers)}`,
             `free: ${formatFileSize(memoryData.free)}`,
@@ -269,7 +268,7 @@ let createCPUProcessData = (data, server_name) => {
                 `pcpus: ${precise(d.pcpus)}`,
                 `pcpuu: ${precise(d.pcpuu)}`,
                 `pid: ${d.pid}`,
-                `pmem: ${d.pmem}`,
+                `pmem: ${precise(d.pmem)}`,
                 `priority: ${d.priority}`,
                 `started: ${formatDate(d.started)}`,
                 `tty: ${d.tty}`,
@@ -360,6 +359,151 @@ let createUptimeData = (data, server_name) => {
     }
 };
 
+let createGraphicsData = (data, server_name) => {
+    try {
+        let graphicsElement = document.querySelector(`.${server_name} ul.graphics-data`);
+    
+        graphicsElement.innerHTML = "";
+
+        let graphicsData = data.graphics.data;
+
+        let arr = [
+            `active: ${formatFileSize(graphicsData.active)}`,
+            `available: ${formatFileSize(graphicsData.available)}`,
+            `buffcache: ${formatFileSize(graphicsData.buffcache)}`,
+            `buffers: ${formatFileSize(graphicsData.buffers)}`,
+            `cached: ${formatFileSize(graphicsData.cached)}`,
+            `free: ${formatFileSize(graphicsData.free)}`,
+            `slab: ${formatFileSize(graphicsData.slab)}`,
+            `swapfree: ${formatFileSize(graphicsData.swapfree)}`,
+            `swaptotal: ${formatFileSize(graphicsData.swaptotal)}`,
+            `swapused: ${formatFileSize(graphicsData.swapused)}`,
+            `total: ${formatFileSize(graphicsData.total)}`,
+            `used: ${formatFileSize(graphicsData.used)}`,
+            `end: ${formatDate(data.graphics.end)}`,
+            `start: ${formatDate(data.graphics.start)}`,
+            `status: ${data.graphics.status}`,
+            `time_stamp: ${formatDate(data.graphics.time_stamp)}`,
+        ]
+
+        arr.forEach(d => {
+            let li = document.createElement("li");
+
+            li.innerHTML += d;
+
+            graphicsElement.appendChild(li);
+        })
+
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+let createBaseboardData = (data, server_name) => {
+    try {
+        let baseBoardElement = document.querySelector(`.${server_name} ul.baseboard-data`);
+    
+        baseBoardElement.innerHTML = "";
+
+        let baseBoardData = data.baseboard.data;
+
+        let arr = [
+            `assetTag: ${baseBoardData.assetTag}`,
+            `manufacturer: ${baseBoardData.manufacturer}`,
+            `model: ${baseBoardData.model}`,
+            `serial: ${baseBoardData.serial}`,
+            `version: ${baseBoardData.version}`,
+            `end: ${formatDate(data.baseboard.end)}`,
+            `start: ${formatDate(data.baseboard.start)}`,
+            `status: ${data.baseboard.status}`,
+            `time_stamp: ${formatDate(data.baseboard.time_stamp)}`,
+        ];
+
+        arr.forEach(d => {
+            let li = document.createElement("li");
+
+            li.innerHTML += d;
+
+            baseBoardElement.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+let createOSData = (data, server_name) => {
+    try {
+        let osElement = document.querySelector(`.${server_name} ul.os-data`);
+    
+        osElement.innerHTML = "";
+
+        let osData = data.os.data;
+
+        let arr = [
+            `arch: ${osData.arch}`,
+            `build: ${osData.build}`,
+            `codename: ${osData.codename}`,
+            `codepage: ${osData.codepage}`,
+            `distro: ${osData.distro}`,
+            `fqdn: ${osData.fqdn}`,
+            `hostname: ${osData.hostname}`,
+            `logofile: ${osData.logofile}`,
+            `platform: ${osData.platform}`,
+            `release: ${osData.release}`,
+            `serial: ${osData.serial}`,
+            `servicepack: ${osData.servicepack}`,
+            `end: ${data.os.end}`,
+            `start: ${data.os.start}`,
+            `status: ${data.os.status}`,
+            `time_stamp: ${data.os.time_stamp}`,
+        ];
+
+        arr.forEach(d => {
+            let li = document.createElement("li");
+
+            li.innerHTML += d;
+
+            osElement.appendChild(li);
+        });
+
+    } catch (err) {
+       console.error(err);
+    }
+};
+
+let createBiosData = (data, server_name) => {
+    try {
+        let biosElement = document.querySelector(`.${server_name} ul.bios-data`);
+    
+        biosElement.innerHTML = "";
+
+        let biosData = data.bios.data;
+
+        let arr = [
+            `releaseDate: ${formatDate(biosData.releaseDate)}`,
+            `revision: ${biosData.revision}`,
+            `vendor: ${biosData.vendor}`,
+            `version: ${biosData.version}`,
+            `end: ${formatDate(data.bios.end)}`,
+            `start: ${formatDate(data.bios.start)}`,
+            `status: ${data.bios.status}`,
+            `time_stamp: ${formatDate(data.bios.time_stamp)}`,
+        ];
+
+        arr.forEach(d => {
+            let li = document.createElement("li");
+
+            li.innerHTML += d;
+
+            biosElement.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error(err);
+    }
+};
+
 let createServerStatsList = (data, server_name) => {
     try {
         createBandwidthData(data, server_name);
@@ -375,6 +519,14 @@ let createServerStatsList = (data, server_name) => {
         createUsersData(data, server_name);
 
         createUptimeData(data, server_name);
+
+        createGraphicsData(data, server_name);
+
+        createBaseboardData(data, server_name);
+
+        createOSData(data, server_name);
+
+        createBiosData(data, server_name);
 
     } catch (err) {
         console.error(err);
