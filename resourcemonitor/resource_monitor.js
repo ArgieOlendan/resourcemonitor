@@ -1,37 +1,42 @@
+var config = {
+    server_manifest_url_local: "http://localhost/resourcemonitor/manifest.json",
+    server_manifest_url_prod: "http://194.156.99.87/manifest.json",
+}
+
 // Helper functions
-let formatDate = (date) => {
+var formatDate = (date) => {
     return new moment(date).format("MM/DD/YYYY h:mm:ss a");
 };
 
-let formatFileSize = (bytes, decimalPoint) => {
+var formatFileSize = (bytes, decimalPoint) => {
     if (bytes == 0) return '0 Bytes';
 
-    let k = 1000;
-    let dm = decimalPoint || 2;
-    let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    let i = Math.floor(Math.log(bytes) / Math.log(k));
+    var k = 1000;
+    var dm = decimalPoint || 2;
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-let parseMillisecondToReadableTime = (duration) => {
-    const portions = [];
+var parseMillisecondToReadabvarime = (duration) => {
+    var portions = [];
 
-    const msInHour = 1000 * 60 * 60;
-    const hours = Math.trunc(duration / msInHour);
+    var msInHour = 1000 * 60 * 60;
+    var hours = Math.trunc(duration / msInHour);
     if (hours > 0) {
         portions.push(hours + 'h');
         duration = duration - (hours * msInHour);
     }
 
-    const msInMinute = 1000 * 60;
-    const minutes = Math.trunc(duration / msInMinute);
+    var msInMinute = 1000 * 60;
+    var minutes = Math.trunc(duration / msInMinute);
     if (minutes > 0) {
         portions.push(minutes + 'm');
         duration = duration - (minutes * msInMinute);
     }
 
-    const seconds = Math.trunc(duration / 1000);
+    var seconds = Math.trunc(duration / 1000);
     if (seconds > 0) {
         portions.push(seconds + 's');
     }
@@ -39,20 +44,20 @@ let parseMillisecondToReadableTime = (duration) => {
     return portions.join(' ');
 }
 
-let precise = (val) => {
+var precise = (val) => {
     return Math.round(val * 100) / 100 + "%";
 };
 
 
 // data
-let createServerLogList = (data, server_name) => {
+var createServerLogList = (data, server_name) => {
     try {
-        let jsonData = data;
+        var jsonData = data;
 
         document.querySelector(`.${server_name} .server-logs`).innerHTML = "";
 
         jsonData.forEach((item) => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.setAttribute("id", item.file_name.split(".")[0]);
 
@@ -63,10 +68,10 @@ let createServerLogList = (data, server_name) => {
             document.querySelector(`.${server_name} .server-logs`).appendChild(li);
         });
 
-        let liFields = document.querySelectorAll(`.${server_name} .file_name`);
+        var liFields = document.querySelectorAll(`.${server_name} .file_name`);
 
         liFields.forEach((field) => {
-            let fieldValue = JSON.stringify(jsonData.filter((item) => { return item.file_name == field.innerHTML }), null, 2);
+            var fieldValue = JSON.stringify(jsonData.filter((item) => { return item.file_name == field.innerHTML }), null, 2);
 
             field.addEventListener("click", () => {
                 document.querySelector(".log-data").innerHTML = fieldValue;
@@ -78,17 +83,17 @@ let createServerLogList = (data, server_name) => {
     }
 };
 
-let createBandwidthData = (data, server_name) => {
+var createBandwidthData = (data, server_name) => {
     try {
-        let bandwidthElement = document.querySelector(`.${server_name} ul.bandwith-data`);
+        var bandwidthElement = document.querySelector(`.${server_name} ul.bandwith-data`);
 
-        let bandwidthData = data.bandwidth.data;
+        var bandwidthData = data.bandwidth.data;
 
         bandwidthData = bandwidthData[0];
 
         bandwidthElement.innerHTML = "";
 
-        let arr = [
+        var arr = [
             `iface: ${bandwidthData.iface}`,
             `ms: ${bandwidthData.ms}`,
             `network_test_1: start: ${formatDate(bandwidthData.network_test[0].start)},
@@ -114,7 +119,7 @@ let createBandwidthData = (data, server_name) => {
         ];
 
         arr.forEach((d) => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -127,15 +132,15 @@ let createBandwidthData = (data, server_name) => {
 
 };
 
-let createCPUData = (data, server_name) => {
+var createCPUData = (data, server_name) => {
     try {
-        let cpuElement = document.querySelector(`.${server_name} ul.cpu-data`);
+        var cpuElement = document.querySelector(`.${server_name} ul.cpu-data`);
 
-        let cpuData = data.cpu.data;
+        var cpuData = data.cpu.data;
 
         cpuElement.innerHTML = "";
 
-        let arr = [
+        var arr = [
             `brand: ${cpuData.brand}`,
             `cache: ${JSON.stringify(cpuData.cache)}`,
             `cores: ${cpuData.cores}`,
@@ -158,7 +163,7 @@ let createCPUData = (data, server_name) => {
         ];
 
         arr.forEach((d) => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -171,17 +176,17 @@ let createCPUData = (data, server_name) => {
 
 };
 
-let createDiskData = (data, server_name) => {
+var createDiskData = (data, server_name) => {
     try {
-        let diskElement = document.querySelector(`.${server_name} .disk-data`);
+        var diskElement = document.querySelector(`.${server_name} .disk-data`);
 
-        let diskData = data.disk.data;
+        var diskData = data.disk.data;
 
         diskElement.innerHTML = "";
 
         diskData.forEach((d) => {
-            let ul = document.createElement("ul");
-            let arr = [
+            var ul = document.createElement("ul");
+            var arr = [
                 `available: ${formatFileSize(d.available)}`,
                 `fs: ${d.fs}`,
                 `mount: ${d.mount}`,
@@ -194,7 +199,7 @@ let createDiskData = (data, server_name) => {
             ]
 
             arr.forEach((d) => {
-                let li = document.createElement("li");
+                var li = document.createElement("li");
 
                 li.innerHTML += d;
 
@@ -209,15 +214,15 @@ let createDiskData = (data, server_name) => {
     }
 };
 
-let createMemoryData = (data, server_name) => {
+var createMemoryData = (data, server_name) => {
     try {
-        let memoryElement = document.querySelector(`.${server_name} ul.memory-data`);
+        var memoryElement = document.querySelector(`.${server_name} ul.memory-data`);
 
-        let memoryData = data.memory.data;
+        var memoryData = data.memory.data;
 
         memoryElement.innerHTML = "";
 
-        let arr = [
+        var arr = [
             `active: ${formatFileSize(memoryData.active)}`,
             `buffcache: ${formatFileSize(memoryData.buffcache)}`,
             `buffers: ${formatFileSize(memoryData.buffers)}`,
@@ -233,7 +238,7 @@ let createMemoryData = (data, server_name) => {
         ];
 
         arr.forEach((d) => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -245,17 +250,17 @@ let createMemoryData = (data, server_name) => {
     }
 };
 
-let createCPUProcessData = (data, server_name) => {
+var createCPUProcessData = (data, server_name) => {
     try {
-        let processElement = document.querySelector(`.${server_name} .process-data`);
+        var processElement = document.querySelector(`.${server_name} .process-data`);
 
-        let processData = data.process.data.list;
+        var processData = data.process.data.list;
 
         processElement.innerHTML = "";
         
         processData.forEach(d => {
-            let ulElement = document.createElement("ul");
-            let arr = [
+            var ulElement = document.createElement("ul");
+            var arr = [
                 `command: ${d.command}`,
                 `mem_rss: ${d.mem_rss}`,
                 `mem_vsz: ${d.mem_vsz}`,
@@ -276,7 +281,7 @@ let createCPUProcessData = (data, server_name) => {
             ];
 
             arr.forEach((d) => {
-                let li = document.createElement("li");
+                var li = document.createElement("li");
 
                 li.innerHTML += d;
 
@@ -291,18 +296,18 @@ let createCPUProcessData = (data, server_name) => {
     }
 };
 
-let createUsersData = (data, server_name) => {
+var createUsersData = (data, server_name) => {
     try {
-        let usersElement = document.querySelector(`.${server_name} .users-data`);
+        var usersElement = document.querySelector(`.${server_name} .users-data`);
         
-        let usersData = data.users.data;
+        var usersData = data.users.data;
         
         usersElement.innerHTML = "";
         
         if (usersData.length) {
             usersData.forEach(d => {
-                let ul = document.createElement("ul");
-                let arr = [
+                var ul = document.createElement("ul");
+                var arr = [
                     `user: ${d.user}`,
                     `tty: ${d.tty}`,
                     `time_stamp: ${d.date + " " + d.time}`,
@@ -311,7 +316,7 @@ let createUsersData = (data, server_name) => {
                 ];
                 
                 arr.forEach(d => {
-                    let li = document.createElement("li");
+                    var li = document.createElement("li");
                     
                     li.innerHTML += d;
                     
@@ -321,7 +326,7 @@ let createUsersData = (data, server_name) => {
                 });
             });
         } else {
-            let span = document.createElement("span");
+            var span = document.createElement("span");
             
             span.innerText = "No users!"
 
@@ -334,20 +339,20 @@ let createUsersData = (data, server_name) => {
     }
 };
 
-let createUptimeData = (data, server_name) => {
+var createUptimeData = (data, server_name) => {
     try {
-        let uptimeElement = document.querySelector(`.${server_name} ul.uptime-data`);
+        var uptimeElement = document.querySelector(`.${server_name} ul.uptime-data`);
 
         uptimeElement.innerHTML = "";
 
-        let arr = [
-            `machine_uptime: ${parseMillisecondToReadableTime(data.machine_uptime)}`,
-            `script_uptime: ${parseMillisecondToReadableTime(data.script_uptime)}`,
+        var arr = [
+            `machine_uptime: ${parseMillisecondToReadabvarime(data.machine_uptime)}`,
+            `script_uptime: ${parseMillisecondToReadabvarime(data.script_uptime)}`,
             `time_stamp: ${formatDate(data.time_stamp)}`,
         ];
 
         arr.forEach(d => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -359,15 +364,15 @@ let createUptimeData = (data, server_name) => {
     }
 };
 
-let createGraphicsData = (data, server_name) => {
+var createGraphicsData = (data, server_name) => {
     try {
-        let graphicsElement = document.querySelector(`.${server_name} ul.graphics-data`);
+        var graphicsElement = document.querySelector(`.${server_name} ul.graphics-data`);
     
         graphicsElement.innerHTML = "";
 
-        let graphicsData = data.graphics.data;
+        var graphicsData = data.graphics.data;
 
-        let arr = [
+        var arr = [
             `active: ${formatFileSize(graphicsData.active)}`,
             `available: ${formatFileSize(graphicsData.available)}`,
             `buffcache: ${formatFileSize(graphicsData.buffcache)}`,
@@ -387,7 +392,7 @@ let createGraphicsData = (data, server_name) => {
         ]
 
         arr.forEach(d => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -399,15 +404,15 @@ let createGraphicsData = (data, server_name) => {
     }
 };
 
-let createBaseboardData = (data, server_name) => {
+var createBaseboardData = (data, server_name) => {
     try {
-        let baseBoardElement = document.querySelector(`.${server_name} ul.baseboard-data`);
+        var baseBoardElement = document.querySelector(`.${server_name} ul.baseboard-data`);
     
         baseBoardElement.innerHTML = "";
 
-        let baseBoardData = data.baseboard.data;
+        var baseBoardData = data.baseboard.data;
 
-        let arr = [
+        var arr = [
             `assetTag: ${baseBoardData.assetTag}`,
             `manufacturer: ${baseBoardData.manufacturer}`,
             `model: ${baseBoardData.model}`,
@@ -420,7 +425,7 @@ let createBaseboardData = (data, server_name) => {
         ];
 
         arr.forEach(d => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -432,15 +437,15 @@ let createBaseboardData = (data, server_name) => {
     }
 };
 
-let createOSData = (data, server_name) => {
+var createOSData = (data, server_name) => {
     try {
-        let osElement = document.querySelector(`.${server_name} ul.os-data`);
+        var osElement = document.querySelector(`.${server_name} ul.os-data`);
     
         osElement.innerHTML = "";
 
-        let osData = data.os.data;
+        var osData = data.os.data;
 
-        let arr = [
+        var arr = [
             `arch: ${osData.arch}`,
             `build: ${osData.build}`,
             `codename: ${osData.codename}`,
@@ -453,14 +458,14 @@ let createOSData = (data, server_name) => {
             `release: ${osData.release}`,
             `serial: ${osData.serial}`,
             `servicepack: ${osData.servicepack}`,
-            `end: ${data.os.end}`,
-            `start: ${data.os.start}`,
+            `end: ${formatDate(data.os.end)}`,
+            `start: ${formatDate(data.os.start)}`,
             `status: ${data.os.status}`,
-            `time_stamp: ${data.os.time_stamp}`,
+            `time_stamp: ${formatDate(data.os.time_stamp)}`,
         ];
 
         arr.forEach(d => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -472,15 +477,15 @@ let createOSData = (data, server_name) => {
     }
 };
 
-let createBiosData = (data, server_name) => {
+var createBiosData = (data, server_name) => {
     try {
-        let biosElement = document.querySelector(`.${server_name} ul.bios-data`);
+        var biosElement = document.querySelector(`.${server_name} ul.bios-data`);
     
         biosElement.innerHTML = "";
 
-        let biosData = data.bios.data;
+        var biosData = data.bios.data;
 
-        let arr = [
+        var arr = [
             `releaseDate: ${formatDate(biosData.releaseDate)}`,
             `revision: ${biosData.revision}`,
             `vendor: ${biosData.vendor}`,
@@ -492,7 +497,7 @@ let createBiosData = (data, server_name) => {
         ];
 
         arr.forEach(d => {
-            let li = document.createElement("li");
+            var li = document.createElement("li");
 
             li.innerHTML += d;
 
@@ -504,7 +509,7 @@ let createBiosData = (data, server_name) => {
     }
 };
 
-let createServerStatsList = (data, server_name) => {
+var createServerStatsList = (data, server_name) => {
     try {
         createBandwidthData(data, server_name);
 
@@ -533,21 +538,51 @@ let createServerStatsList = (data, server_name) => {
     }
 }
 
-let setServerStatus = (server_name, status) => {
-    let element = document.querySelector(`.${server_name} .server-status`);
+var createServerTimeline = (data, server_name) => {
+    try {
+        var timeLineElement = document.querySelector("#timeline");
+        var logs = data;
+
+        timeLineElement.innerHTML = "";
+        
+        logs.forEach(log => {
+            var option = document.createElement("option");
+
+            option.innerText += log.file_name.split(".")[0];
+
+            timeLineElement.add(option);
+        });
+
+        // Bind change event
+        timeLineElement.addEventListener("change", () => {
+            var jsonData = data.filter(d => { return d.file_name === timeLineElement.value + ".json" });
+
+            console.log(jsonData[0]);
+
+            createServerStatsList(jsonData[0], server_name);
+
+        });
+
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+var setServerStatus = (server_name, status) => {
+    var element = document.querySelector(`.${server_name} .server-status`);
 
     element.innerHTML = `<p style='color: ${status == "online" ? "green" : "red"};'>${status}</p>`;
 };
 
-let startServer = (server) => {
+var startServer = (server) => {
     try {
-        let socketServer = new WebSocket(server.url);
-        let log_timer = 0;
-        let stats_timer = 0;
-        let reconnect_timer = 0;
+        var socketServer = new WebSocket(server.url);
+        var log_timer = 0;
+        var stats_timer = 0;
+        var reconnect_timer = 0;
 
-        let getLogs = () => {
-            let timeout = 60000;
+        var getLogs = () => {
+            var timeout = 60000;
 
             if (socketServer.readyState == socketServer.OPEN) {
                 socketServer.send('getLogs');
@@ -556,8 +591,8 @@ let startServer = (server) => {
             log_timer = setTimeout(getLogs, timeout);
         }
 
-        let getServerStats = () => {
-            let timeout = 30000;
+        var getServerStats = () => {
+            var timeout = 30000;
 
             if (socketServer.readyState == socketServer.OPEN) {
                 socketServer.send('getServerStats');
@@ -566,20 +601,20 @@ let startServer = (server) => {
             log_timer = setTimeout(getLogs, timeout);
         }
 
-        let cancelGetLogs = () => {
+        var cancelGetLogs = () => {
             if (log_timer) {
                 clearTimeout(log_timer);
             }
         }
 
-        let cancelGetServerStats = () => {
+        var cancelGetServerStats = () => {
             if (stats_timer) {
                 clearTimeout(stats_timer);
             }
         }
 
-        let reconnect = () => {
-            let timeout = 60000;
+        var reconnect = () => {
+            var timeout = 60000;
 
             reconnect_timer = setTimeout(() => {
                 startServer(server);
@@ -587,20 +622,24 @@ let startServer = (server) => {
         }
 
         socketServer.onopen = () => {
+            setServerStatus(server.server_name, "online");
+
             getLogs();
 
             getServerStats();
 
-            setServerStatus(server.server_name, "online");
         }
 
         socketServer.onmessage = (event) => {
-            let jsonData = JSON.parse(event.data);
+            var jsonData = JSON.parse(event.data);
 
 
             if (jsonData) {
                 if (jsonData.length > 0 && jsonData[0].hasOwnProperty("file_name")) {
                     createServerLogList(jsonData, server.server_name);
+
+                    createServerTimeline(jsonData, server.server_name);
+
                 } else {
                     createServerStatsList(jsonData, server.server_name);
                 }
@@ -628,7 +667,7 @@ let startServer = (server) => {
     }
 }
 
-let startWebsocketServers = async (serverManifest) => {
+var startWebsocketServers = async (serverManifest) => {
     try {
         Object.values(serverManifest.servers).forEach(async (server) => {
             await startServer(server);
@@ -640,9 +679,7 @@ let startWebsocketServers = async (serverManifest) => {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const url = "http://localhost/resourcemonitor/manifest.json";
-
-    await fetch(url)
+    await fetch(config.server_manifest_url_prod)
         .then((res) => {
             if (res.status !== 200) {
                 console.log(`Looks like there was a problem. Status Code: ${res.status}`);

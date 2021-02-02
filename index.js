@@ -14,7 +14,7 @@ var config = {
 		"http://duckduckgo.com"
 	],
 	logs_path: "./logs",
-	max_logs_size_in_bytes: 10000000
+	max_logs_size_in_bytes: 10000000,
 };
 
 var wss = new WebSocket.Server({ port: config.port });
