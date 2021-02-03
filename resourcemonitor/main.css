@@ -1,5 +1,6 @@
 .main {
   display: flex;
+  box-sizing: content-box;
 }
 
 .server {
@@ -51,4 +52,15 @@ ul.server-logs li:hover {
 
 ul {
   list-style: none;
+}
+
+.spinner-border {
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
 }

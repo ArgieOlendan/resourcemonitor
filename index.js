@@ -82,6 +82,26 @@ var getServerStatistics = () => {
 	}
 }
 
+var getTimeline = () => {
+	try {
+		var cache = config.cache;
+		let fileNames;
+
+		if (cache.length) {
+			fileNames = cache.map(d => {
+				return d.file_name;
+			});
+		} else {
+			fileNames = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		}
+
+		return { timeline: fileNames };
+
+	} catch (err) {
+		console.error(err);
+	}
+}
+
 // Events
 wss.on("connection", (ws) => {
 	ws.on("message", (message) => {
@@ -95,6 +115,12 @@ wss.on("connection", (ws) => {
 				var serverStats = getServerStatistics();
 
 				ws.send(serverStats);
+			} 
+			else if (message == "getTimeline") {
+				var timeline = getTimeline();
+
+				ws.send(JSON.stringify(timeline));
+				
 			} else {
 				ws.send("");
 			}
@@ -796,4 +822,4 @@ var sleep = (ms) => {
 };
 
 // Run script
-// run();
+run();

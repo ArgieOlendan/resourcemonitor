@@ -3,6 +3,8 @@ var config = {
     server_manifest_url_prod: "http://194.156.99.87/manifest.json",
 }
 
+var server_logs;
+
 // Helper functions
 var formatDate = (date) => {
     return new moment(date).format("MM/DD/YYYY h:mm:ss a");
@@ -48,6 +50,15 @@ var precise = (val) => {
     return Math.round(val * 100) / 100 + "%";
 };
 
+var showLockScreen = () => {
+    $("#lockscreen").modal("show");
+}
+
+var hideLockScreen = () => {
+    setTimeout(() => {
+        $("#lockscreen").modal("hide");
+    }, 1000);
+}
 
 // data
 var createServerLogList = (data, server_name) => {
@@ -69,6 +80,7 @@ var createServerLogList = (data, server_name) => {
         });
 
         var liFields = document.querySelectorAll(`.${server_name} .file_name`);
+        var timeLineElement = document.querySelector("#timeline");
 
         liFields.forEach((field) => {
             var fieldValue = JSON.stringify(jsonData.filter((item) => { return item.file_name == field.innerHTML }), null, 2);
@@ -76,6 +88,17 @@ var createServerLogList = (data, server_name) => {
             field.addEventListener("click", () => {
                 document.querySelector(".log-data").innerHTML = fieldValue;
             });
+        });
+
+        timeLineElement.addEventListener("change", () => {
+            var jsonData = data.filter(d => { return d.file_name === timeLineElement.value + ".json" });
+
+            showLockScreen();
+
+            createServerStatsList(jsonData[0], server_name);
+
+            hideLockScreen();
+
         });
 
     } catch (err) {
@@ -538,29 +561,19 @@ var createServerStatsList = (data, server_name) => {
     }
 }
 
-var createServerTimeline = (data, server_name) => {
+var createServerTimeline = (data) => {
     try {
         var timeLineElement = document.querySelector("#timeline");
-        var logs = data;
+        var timeline = data.timeline;
 
         timeLineElement.innerHTML = "";
         
-        logs.forEach(log => {
+        timeline.forEach(log => {
             var option = document.createElement("option");
 
-            option.innerText += log.file_name.split(".")[0];
+            option.innerText += log.split(".")[0];
 
             timeLineElement.add(option);
-        });
-
-        // Bind change event
-        timeLineElement.addEventListener("change", () => {
-            var jsonData = data.filter(d => { return d.file_name === timeLineElement.value + ".json" });
-
-            console.log(jsonData[0]);
-
-            createServerStatsList(jsonData[0], server_name);
-
         });
 
     } catch (err) {
@@ -576,13 +589,16 @@ var setServerStatus = (server_name, status) => {
 
 var startServer = (server) => {
     try {
-        var socketServer = new WebSocket(server.url);
         var log_timer = 0;
-        var stats_timer = 0;
         var reconnect_timer = 0;
+        var socketServer = new WebSocket(server.url);
+        var stats_timer = 0;
+        var timeline_timer = 0;
 
         var getLogs = () => {
-            var timeout = 60000;
+            var timeout = 300000; // 5 minutes
+
+            showLockScreen();
 
             if (socketServer.readyState == socketServer.OPEN) {
                 socketServer.send('getLogs');
@@ -592,7 +608,9 @@ var startServer = (server) => {
         }
 
         var getServerStats = () => {
-            var timeout = 30000;
+            var timeout = 180000; // 3 minutes
+
+            showLockScreen();
 
             if (socketServer.readyState == socketServer.OPEN) {
                 socketServer.send('getServerStats');
@@ -600,6 +618,19 @@ var startServer = (server) => {
 
             log_timer = setTimeout(getLogs, timeout);
         }
+
+        var getTimeline = () => {
+            var timeout = 120000; // 2 minutes
+            
+            showLockScreen();
+
+            if (socketServer.readyState == socketServer.OPEN) {
+                socketServer.send('getTimeline');
+            }
+
+            timeline_timer = setTimeout(getTimeline, timeout);
+        }
+
 
         var cancelGetLogs = () => {
             if (log_timer) {
@@ -613,6 +644,12 @@ var startServer = (server) => {
             }
         }
 
+        var cancelGetServerTimeline = () => {
+            if (timeline_timer) {
+                clearTimeout(timeline_timer);
+            }
+        }
+
         var reconnect = () => {
             var timeout = 60000;
 
@@ -623,27 +660,30 @@ var startServer = (server) => {
 
         socketServer.onopen = () => {
             setServerStatus(server.server_name, "online");
-
-            getLogs();
-
+            
             getServerStats();
 
+            getTimeline();
+
+            getLogs();
         }
 
         socketServer.onmessage = (event) => {
-            var jsonData = JSON.parse(event.data);
+            serverResponse = JSON.parse(event.data);
 
-
-            if (jsonData) {
-                if (jsonData.length > 0 && jsonData[0].hasOwnProperty("file_name")) {
-                    createServerLogList(jsonData, server.server_name);
-
-                    createServerTimeline(jsonData, server.server_name);
-
+            if (serverResponse) {
+                if (serverResponse.length > 0 && serverResponse[0].hasOwnProperty("file_name")) {
+                    createServerLogList(serverResponse, server.server_name);
+                } 
+                else if (serverResponse.hasOwnProperty("timeline")) {
+                    createServerTimeline(serverResponse, server.server_name);
                 } else {
-                    createServerStatsList(jsonData, server.server_name);
+                    createServerStatsList(serverResponse, server.server_name);
                 }
+
             }
+
+            hideLockScreen();
         }
 
         socketServer.onerror = (event) => {
@@ -653,9 +693,11 @@ var startServer = (server) => {
         }
 
         socketServer.onclose = () => {
-            cancelGetLogs();
-
             cancelGetServerStats();
+
+            cancelGetServerTimeline();
+
+            cancelGetLogs();
 
             setServerStatus(server.server_name, "offline");
 
@@ -670,7 +712,7 @@ var startServer = (server) => {
 var startWebsocketServers = async (serverManifest) => {
     try {
         Object.values(serverManifest.servers).forEach(async (server) => {
-            await startServer(server);
+            startServer(server);
         });
 
     } catch (err) {
@@ -679,6 +721,7 @@ var startWebsocketServers = async (serverManifest) => {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+
     await fetch(config.server_manifest_url_prod)
         .then((res) => {
             if (res.status !== 200) {
@@ -686,8 +729,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            res.json().then(async (data) => {
-                await startWebsocketServers(data);
+            res.json().then((data) => {
+                startWebsocketServers(data);
             });
+
         });
 });
