@@ -3,8 +3,6 @@ var config = {
     server_manifest_url_prod: "http://194.156.99.87/manifest.json",
 }
 
-var server_logs;
-
 // Helper functions
 var formatDate = (date) => {
     return new moment(date).format("MM/DD/YYYY h:mm:ss a");
@@ -57,48 +55,38 @@ var showLockScreen = () => {
 var hideLockScreen = () => {
     setTimeout(() => {
         $("#lockscreen").modal("hide");
-    }, 1000);
+    }, 500);
 }
 
 // data
-var createServerLogList = (data, server_name) => {
+var createServerLogList = (data, server_name, socketServer) => {
     try {
-        var jsonData = data;
-
         document.querySelector(`.${server_name} .server-logs`).innerHTML = "";
 
-        jsonData.forEach((item) => {
+        data.logs.forEach((fileName) => {
             var li = document.createElement("li");
 
-            li.setAttribute("id", item.file_name.split(".")[0]);
+            li.setAttribute("id", fileName.split(".")[0]);
 
             li.setAttribute("class", "file_name");
 
-            li.innerHTML += item.file_name;
+            li.innerHTML += fileName;
 
             document.querySelector(`.${server_name} .server-logs`).appendChild(li);
         });
 
         var liFields = document.querySelectorAll(`.${server_name} .file_name`);
-        var timeLineElement = document.querySelector("#timeline");
 
         liFields.forEach((field) => {
-            var fieldValue = JSON.stringify(jsonData.filter((item) => { return item.file_name == field.innerHTML }), null, 2);
+            field.removeEventListener("click", () => { });
 
             field.addEventListener("click", () => {
-                document.querySelector(".log-data").innerHTML = fieldValue;
+                var request = { message: "getLog", fileName: field.innerHTML };
+
+                showLockScreen();
+
+                socketServer.send(JSON.stringify(request));
             });
-        });
-
-        timeLineElement.addEventListener("change", () => {
-            var jsonData = data.filter(d => { return d.file_name === timeLineElement.value + ".json" });
-
-            showLockScreen();
-
-            createServerStatsList(jsonData[0], server_name);
-
-            hideLockScreen();
-
         });
 
     } catch (err) {
@@ -534,6 +522,8 @@ var createBiosData = (data, server_name) => {
 
 var createServerStatsList = (data, server_name) => {
     try {
+        data = JSON.parse(data);
+
         createBandwidthData(data, server_name);
 
         createCPUData(data, server_name);
@@ -561,19 +551,28 @@ var createServerStatsList = (data, server_name) => {
     }
 }
 
-var createServerTimeline = (data) => {
+var createServerTimeline = (data, socketServer) => {
     try {
         var timeLineElement = document.querySelector("#timeline");
-        var timeline = data.timeline;
 
         timeLineElement.innerHTML = "";
         
-        timeline.forEach(log => {
+        data.logs.forEach(log => {
             var option = document.createElement("option");
 
-            option.innerText += log.split(".")[0];
+            option.innerText += log;
 
             timeLineElement.add(option);
+        });
+
+        $("#timeline").off("change");
+
+        $("#timeline").bind("change", () => {
+            var request = { message: "getTimeline", fileName: timeLineElement.value };
+
+            showLockScreen();
+
+            socketServer.send(JSON.stringify(request));
         });
 
     } catch (err) {
@@ -587,6 +586,10 @@ var setServerStatus = (server_name, status) => {
     element.innerHTML = `<p style='color: ${status == "online" ? "green" : "red"};'>${status}</p>`;
 };
 
+var setLogDataValue = (data) => {
+    document.querySelector(".log-data").innerHTML = data;
+}
+
 var startServer = (server) => {
     try {
         var log_timer = 0;
@@ -596,41 +599,32 @@ var startServer = (server) => {
         var timeline_timer = 0;
 
         var getLogs = () => {
-            var timeout = 300000; // 5 minutes
+            var timeout = 300000;
 
             showLockScreen();
 
             if (socketServer.readyState == socketServer.OPEN) {
-                socketServer.send('getLogs');
+                var request = { message: "getLogs" }
+
+                socketServer.send(JSON.stringify(request));
             }
 
             log_timer = setTimeout(getLogs, timeout);
         }
 
         var getServerStats = () => {
-            var timeout = 180000; // 3 minutes
+            var timeout = 300000;
 
             showLockScreen();
 
             if (socketServer.readyState == socketServer.OPEN) {
-                socketServer.send('getServerStats');
+                var request = { message: "getServerStats" }
+
+                socketServer.send(JSON.stringify(request));
             }
 
-            log_timer = setTimeout(getLogs, timeout);
+            log_timer = setTimeout(getServerStats, timeout);
         }
-
-        var getTimeline = () => {
-            var timeout = 120000; // 2 minutes
-            
-            showLockScreen();
-
-            if (socketServer.readyState == socketServer.OPEN) {
-                socketServer.send('getTimeline');
-            }
-
-            timeline_timer = setTimeout(getTimeline, timeout);
-        }
-
 
         var cancelGetLogs = () => {
             if (log_timer) {
@@ -663,8 +657,6 @@ var startServer = (server) => {
             
             getServerStats();
 
-            getTimeline();
-
             getLogs();
         }
 
@@ -672,13 +664,22 @@ var startServer = (server) => {
             serverResponse = JSON.parse(event.data);
 
             if (serverResponse) {
-                if (serverResponse.length > 0 && serverResponse[0].hasOwnProperty("file_name")) {
-                    createServerLogList(serverResponse, server.server_name);
-                } 
-                else if (serverResponse.hasOwnProperty("timeline")) {
-                    createServerTimeline(serverResponse, server.server_name);
-                } else {
-                    createServerStatsList(serverResponse, server.server_name);
+                if (serverResponse.hasOwnProperty("logs")) {
+                    createServerLogList(serverResponse, server.server_name, socketServer);
+
+                    createServerTimeline(serverResponse, socketServer);
+                }
+
+                if (serverResponse.hasOwnProperty("log")) {
+                    setLogDataValue(serverResponse.log);
+                }
+
+                if (serverResponse.hasOwnProperty("timeline")) {
+                    createServerStatsList(serverResponse.timeline, server.server_name);
+                }
+
+                if (serverResponse.hasOwnProperty("server_statistics")) {
+                    createServerStatsList(serverResponse.server_statistics, server.server_name);
                 }
 
             }

@@ -20,43 +20,49 @@ var config = {
 var wss = new WebSocket.Server({ port: config.port });
 
 // Server
-var getLogs = () => {
+var getLogData = (file_name, message) => {
 	try {
-		var logs = [];
+		var log = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData });
 
-		var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var response;
 
-		if (files.length) {
-			files.forEach((file) => {
-				var value = config.cache.filter((val) => {
-					return val.file_name.includes(file);
-				});
+		switch (message) {
+			case 'getLog':
+				response = { log };	
 
-				if (value.length) {
-					value.forEach(val => {
-						logs.push(val);
-					});
-					
-				} else {
-					var fileName = { file_name: file }
+				break;
+			case 'getTimeline':
+				response = { timeline: log };
 
-					var content = _fs.readFileSync(config.logs_path + `/${file}`, "utf-8", (err, fileData) => { return fileData });
+				break;
 
-					var fileData = Object.assign({}, fileName, JSON.parse(content));
-
-					config.cache.push(fileData);
-
-					logs.push(fileData);
-				}
-			});
+			default:
+				break;
 		}
 
-		return logs;
+		response = JSON.stringify(response);
+
+		return response;
 
 	} catch (err) {
 		console.error(err);
 	}
-}
+};
+
+var getLogs = () => {
+	try {
+		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+
+		var result = { logs };
+
+		result = JSON.stringify(result);
+
+		return result;
+
+	} catch (err) {
+		console.error(err);
+	}
+};
 
 var getServerStatistics = () => {
 	try {
@@ -69,61 +75,51 @@ var getServerStatistics = () => {
 			var logfile = files.pop();
 	
 			var content;
+
+			content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+
+			var statistics = { server_statistics: content };
+
+			statistics = JSON.stringify(statistics);
 	
-			if (logfile) {
-				content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
-			}
-	
-			return content;
+			return statistics;
 		}
 
 	} catch (err) {
 		console.error(err);
 	}
-}
-
-var getTimeline = () => {
-	try {
-		var cache = config.cache;
-		let fileNames;
-
-		if (cache.length) {
-			fileNames = cache.map(d => {
-				return d.file_name;
-			});
-		} else {
-			fileNames = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
-		}
-
-		return { timeline: fileNames };
-
-	} catch (err) {
-		console.error(err);
-	}
-}
+};
 
 // Events
 wss.on("connection", (ws) => {
-	ws.on("message", (message) => {
+	ws.on("message", (request) => {
 		try {
-			if (message == "getLogs") {
+			request = JSON.parse(request);
+
+			if (request.message === "getServerStats") {
+				var statistics = getServerStatistics();
+
+				ws.send(statistics);
+			}
+			
+			if (request.message === "getLogs") {
 				var logs = getLogs();
 
-				ws.send(JSON.stringify(logs));
+				ws.send(logs);
 			}
-			else if (message == "getServerStats") {
-				var serverStats = getServerStatistics();
 
-				ws.send(serverStats);
-			} 
-			else if (message == "getTimeline") {
-				var timeline = getTimeline();
+			if (request.message === "getLog" && request.fileName) {
+				var log = getLogData(request.fileName, request.message);
 
-				ws.send(JSON.stringify(timeline));
-				
-			} else {
-				ws.send("");
+				ws.send(log);
 			}
+
+			if (request.message === "getTimeline" && request.fileName) {
+				var timeLinedata = getLogData(request.fileName, request.message);
+
+				ws.send(timeLinedata);
+			}
+
 		} catch (err) {
 			console.error(err);
 		}
@@ -132,7 +128,7 @@ wss.on("connection", (ws) => {
 
 // logging
 // Executions
-var execIpRules = async () => {
+var exec_ip_rules = async () => {
 	var end;
 	var message;
 	var start = new Date().toISOString();
@@ -145,7 +141,7 @@ var execIpRules = async () => {
 
 				status = true;
 			} else {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 			}
@@ -170,9 +166,9 @@ var execIpRules = async () => {
 			message, 
 			time_stamp: new Date().toISOString() 
 		};
-}
+};
 
-var execNstat = async () => {
+var exec_n_stat = async () => {
 	var end;
 	var message;
 	var start = new Date().toISOString();
@@ -185,7 +181,7 @@ var execNstat = async () => {
 
 				status = true;
 			} else {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 			}
@@ -275,7 +271,7 @@ var bandwidth = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -303,7 +299,7 @@ var bandwidth = async () => {
 		};
 };
 
-var baseBoard = async () => {
+var base_board = async () => {
 	var baseboard_data;
 	var end;
 	var message;
@@ -322,7 +318,7 @@ var baseBoard = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -368,7 +364,7 @@ var bios = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -419,7 +415,7 @@ var cpu = async () => {
 
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -470,7 +466,7 @@ var disk = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -517,7 +513,7 @@ var graphics = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -563,7 +559,7 @@ var memory = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -590,7 +586,7 @@ var memory = async () => {
 		};
 };
 
-var machineUptime = () => {
+var machine_uptime = () => {
 	return si.time().uptime * 1000;
 };
 
@@ -613,7 +609,7 @@ var os = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -657,7 +653,7 @@ var process = async () => {
 				resolve();
 			})
 			.catch((err) => {
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -682,7 +678,7 @@ var process = async () => {
 		};
 };
 
-var scriptRunTime = () => {
+var script_run_time = () => {
 	return Math.round(_process.uptime() * 1000);
 };
 
@@ -706,7 +702,7 @@ var users = async () => {
 			})
 			.catch((err) => {
 				showServerErrorStatus
-				message = formatStr(err.message);
+				message = format_str(err.message);
 
 				console.error(err.message);
 
@@ -734,23 +730,23 @@ var users = async () => {
 };
 
 // Get all data
-var getStats = async () => {
+var get_stats = async () => {
 	try {
 		return {
 			bandwidth: await bandwidth(),
-			baseboard: await baseBoard(),
+			baseboard: await base_board(),
 			bios: await bios(),
 			cpu: await cpu(),
 			disk: await disk(),
 			graphics: await graphics(),
-			ip_tables: await execIpRules(),
+			ip_tables: await exec_ip_rules(),
 			memory: await memory(),
-			net_statistics: await execNstat(),
+			net_statistics: await exec_n_stat(),
 			os: await os(),
 			process: await process(),
-			script_uptime: scriptRunTime(),
+			script_uptime: script_run_time(),
 			time_stamp: new Date().toISOString(),
-			machine_uptime: machineUptime(),
+			machine_uptime: machine_uptime(),
 			users: await users(),
 		};
 		
@@ -768,15 +764,15 @@ var run = async () => {
 
 			var filePath = _path.join(__dirname, "/logs/", fileName);
 
-			var stats = await getStats();
+			var stats = await get_stats();
 
 			var exceedAllocatedMemory = Buffer.byteLength(JSON.stringify(config.cache)) > config.max_logs_size_in_bytes;
 
 			if (exceedAllocatedMemory) {
-				deleteLogFiles();
+				delete_log_files();
 			} 
 			
-			createLogFile(filePath, stats);
+			create_log_file(filePath, stats);
 			
 			await sleep(ms);
 
@@ -787,7 +783,7 @@ var run = async () => {
 };
 
 // Helper Functions
-var deleteLogFiles = () => {
+var delete_log_files = () => {
 	try {
 		config.cache.forEach(file => {
 			_fs.unlink(_path.join(__dirname, "/logs/", file.file_name), () => { });
@@ -800,7 +796,7 @@ var deleteLogFiles = () => {
 	}
 };
 
-var createLogFile = (filePath, data) => {
+var create_log_file = (filePath, data) => {
 	try {
 		var fileData = JSON.stringify(data, null, 4);
 
@@ -811,7 +807,7 @@ var createLogFile = (filePath, data) => {
 	}
 }
 
-var formatStr = (str) => {
+var format_str = (str) => {
 	return str.replace(/\\n/g, " ");
 };
 
