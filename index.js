@@ -22,17 +22,28 @@ var wss = new WebSocket.Server({ port: config.port });
 // Server
 var get_log_data = (file_name, message) => {
 	try {
-		var log = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData });
+		var cached_data = config.cache.filter(cd => {
+			if (cd.log_file_id === file_name) { return cd.content }
+		});
+		var log;
+		var result;
 
-		var response;
+		if (cached_data.length) {
+			log = cached_data[0].content;
+		} else {
+			log = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData });
+
+			config.cache.push({ log_file_id: file_name, content: log });
+		}
+
 
 		switch (message) {
-			case 'getLog':
-				response = { log };	
+			case 'get log':
+				result = { log };
 
 				break;
-			case 'getTimeline':
-				response = { timeline: log };
+			case 'get timeline':
+				result = { timeline: log };
 
 				break;
 
@@ -40,9 +51,9 @@ var get_log_data = (file_name, message) => {
 				break;
 		}
 
-		response = JSON.stringify(response);
+		result = JSON.stringify(result);
 
-		return response;
+		return result;
 
 	} catch (err) {
 		console.error(err);
@@ -66,24 +77,17 @@ var get_logs = () => {
 
 var get_server_statistics = () => {
 	try {
-		if (config.cache.length) {
-			return JSON.stringify(config.cache.pop());
+		var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 
-		} else {
-			var files = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
-	
-			var logfile = files.pop();
-	
-			var content;
+		var logfile = files.pop();
 
-			content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
+		var content = _fs.readFileSync(config.logs_path + `/${logfile}`, "utf-8", (err, fileData) => { return fileData });
 
-			var statistics = { server_statistics: content };
+		var statistics = { server_statistics: content };
 
-			statistics = JSON.stringify(statistics);
-	
-			return statistics;
-		}
+		statistics = JSON.stringify(statistics);
+
+		return statistics;
 
 	} catch (err) {
 		console.error(err);
@@ -96,25 +100,25 @@ wss.on("connection", (ws) => {
 		try {
 			request = JSON.parse(request);
 
-			if (request.message === "getServerStats") {
+			if (request.message === "get stats") {
 				var statistics = get_server_statistics();
 
 				ws.send(statistics);
 			}
 			
-			if (request.message === "getLogs") {
+			if (request.message === "get logs") {
 				var logs = get_logs();
 
 				ws.send(logs);
 			}
 
-			if (request.message === "getLog" && request.fileName) {
+			if (request.message === "get log" && request.fileName) {
 				var log = get_log_data(request.fileName, request.message);
 
 				ws.send(log);
 			}
 
-			if (request.message === "getTimeline" && request.fileName) {
+			if (request.message === "get timeline" && request.fileName) {
 				var timeLinedata = get_log_data(request.fileName, request.message);
 
 				ws.send(timeLinedata);
@@ -770,7 +774,7 @@ var run = async () => {
 
 			if (exceedAllocatedMemory) {
 				delete_log_files();
-			} 
+			}
 			
 			create_log_file(filePath, stats);
 			
