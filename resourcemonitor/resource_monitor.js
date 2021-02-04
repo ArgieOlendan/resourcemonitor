@@ -50,13 +50,11 @@ var precise = (val) => {
 
 var show_lock_screen = () => {
     $("#lockscreen").modal("show");
-    console.log("show");
 }
 
 var hide_lock_screen = () => {
     setTimeout(() => {
         $("#lockscreen").modal("hide");
-        console.log("hide");
     }, 1000);
 }
 
@@ -555,22 +553,22 @@ var create_server_stats_list = (data, server_name) => {
 
 var create_server_timeline = (data, socketServer) => {
     try {
-        var timeLineElement = document.querySelector("#timeline");
+        var timeline_element = document.querySelector("#timeline");
 
-        timeLineElement.innerHTML = "";
+        timeline_element.innerHTML = "";
         
         data.logs.forEach(log => {
             var option = document.createElement("option");
 
             option.innerText += log;
 
-            timeLineElement.add(option);
+            timeline_element.add(option);
         });
 
         $("#timeline").off("change");
 
         $("#timeline").bind("change", () => {
-            var request = { message: "get timeline", fileName: timeLineElement.value };
+            var request = { message: "get timeline", fileName: timeline_element.value };
 
             show_lock_screen();
 
@@ -598,16 +596,15 @@ var start_server = (server) => {
         var reconnect_timer = 0;
         var socket_server = new WebSocket(server.url);
         var stats_timer = 0;
-        var timeline_timer = 0;
 
         var get_logs = () => {
-            var timeout = 300000;
-
-            show_lock_screen();
+            var timeout = 180000;
 
             if (socket_server.readyState == socket_server.OPEN) {
-                var request = { message: "get logs" }
+                var request = { message: "get logs" };
 
+                show_lock_screen();
+                
                 socket_server.send(JSON.stringify(request));
             }
 
@@ -615,19 +612,27 @@ var start_server = (server) => {
         }
 
         var get_server_stats = () => {
-            var timeout = 300000;
-
-            show_lock_screen();
+            var timeout = 60000;
 
             if (socket_server.readyState == socket_server.OPEN) {
-                var request = { message: "get stats" }
+                var request = { message: "get stats" };
+
+                show_lock_screen();
 
                 socket_server.send(JSON.stringify(request));
             }
 
-            log_timer = setTimeout(get_server_stats, timeout);
+            stats_timer = setTimeout(get_server_stats, timeout);
         }
 
+        var reconnect = () => {
+            var timeout = 30000;
+
+            reconnect_timer = setTimeout(() => {
+                start_server(server);
+            }, timeout);
+        }
+        
         var cancel_get_logs = () => {
             if (log_timer) {
                 clearTimeout(log_timer);
@@ -640,15 +645,15 @@ var start_server = (server) => {
             }
         }
 
-        var reconnect = () => {
-            var timeout = 60000;
-
-            reconnect_timer = setTimeout(() => {
-                start_server(server);
-            }, timeout);
+        var cancel_reconnect = () => {
+            if (reconnect_timer) {
+                clearTimeout(reconnect_timer);
+            }
         }
 
         socket_server.onopen = () => {
+            cancel_reconnect();
+
             set_server_status(server.server_name, "online");
             
             get_server_stats();
@@ -664,23 +669,29 @@ var start_server = (server) => {
                     create_server_log_list(server_response, server.server_name, socket_server);
 
                     create_server_timeline(server_response, socket_server);
+
+                    hide_lock_screen();
                 }
 
                 if (server_response.hasOwnProperty("log")) {
                     set_log_data_value(server_response.log);
+
+                    hide_lock_screen();
                 }
 
                 if (server_response.hasOwnProperty("timeline")) {
                     create_server_stats_list(server_response.timeline, server.server_name);
+
+                    hide_lock_screen();
                 }
 
                 if (server_response.hasOwnProperty("server_statistics")) {
                     create_server_stats_list(server_response.server_statistics, server.server_name);
+
+                    hide_lock_screen();
                 }
 
             }
-
-            hide_lock_screen();
         }
 
         socket_server.onerror = (event) => {
