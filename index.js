@@ -20,7 +20,7 @@ var config = {
 var wss = new WebSocket.Server({ port: config.port });
 
 // Server
-var getLogData = (file_name, message) => {
+var get_log_data = (file_name, message) => {
 	try {
 		var log = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData });
 
@@ -49,7 +49,7 @@ var getLogData = (file_name, message) => {
 	}
 };
 
-var getLogs = () => {
+var get_logs = () => {
 	try {
 		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 
@@ -64,7 +64,7 @@ var getLogs = () => {
 	}
 };
 
-var getServerStatistics = () => {
+var get_server_statistics = () => {
 	try {
 		if (config.cache.length) {
 			return JSON.stringify(config.cache.pop());
@@ -97,25 +97,25 @@ wss.on("connection", (ws) => {
 			request = JSON.parse(request);
 
 			if (request.message === "getServerStats") {
-				var statistics = getServerStatistics();
+				var statistics = get_server_statistics();
 
 				ws.send(statistics);
 			}
 			
 			if (request.message === "getLogs") {
-				var logs = getLogs();
+				var logs = get_logs();
 
 				ws.send(logs);
 			}
 
 			if (request.message === "getLog" && request.fileName) {
-				var log = getLogData(request.fileName, request.message);
+				var log = get_log_data(request.fileName, request.message);
 
 				ws.send(log);
 			}
 
 			if (request.message === "getTimeline" && request.fileName) {
-				var timeLinedata = getLogData(request.fileName, request.message);
+				var timeLinedata = get_log_data(request.fileName, request.message);
 
 				ws.send(timeLinedata);
 			}
