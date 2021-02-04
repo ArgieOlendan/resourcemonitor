@@ -4,11 +4,11 @@ var config = {
 }
 
 // Helper functions
-var formatDate = (date) => {
+var format_date = (date) => {
     return new moment(date).format("MM/DD/YYYY h:mm:ss a");
 };
 
-var formatFileSize = (bytes, decimalPoint) => {
+var format_file_size = (bytes, decimalPoint) => {
     if (bytes == 0) return '0 Bytes';
 
     var k = 1000;
@@ -19,21 +19,21 @@ var formatFileSize = (bytes, decimalPoint) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-var parseMillisecondToReadabvarime = (duration) => {
+var parse_millisecond_to_readable_time = (duration) => {
     var portions = [];
 
-    var msInHour = 1000 * 60 * 60;
-    var hours = Math.trunc(duration / msInHour);
+    var ms_in_hour = 1000 * 60 * 60;
+    var hours = Math.trunc(duration / ms_in_hour);
     if (hours > 0) {
         portions.push(hours + 'h');
-        duration = duration - (hours * msInHour);
+        duration = duration - (hours * ms_in_hour);
     }
 
-    var msInMinute = 1000 * 60;
-    var minutes = Math.trunc(duration / msInMinute);
+    var ms_in_minute = 1000 * 60;
+    var minutes = Math.trunc(duration / ms_in_minute);
     if (minutes > 0) {
         portions.push(minutes + 'm');
-        duration = duration - (minutes * msInMinute);
+        duration = duration - (minutes * ms_in_minute);
     }
 
     var seconds = Math.trunc(duration / 1000);
@@ -48,18 +48,20 @@ var precise = (val) => {
     return Math.round(val * 100) / 100 + "%";
 };
 
-var showLockScreen = () => {
+var show_lock_screen = () => {
     $("#lockscreen").modal("show");
+    console.log("show");
 }
 
-var hideLockScreen = () => {
+var hide_lock_screen = () => {
     setTimeout(() => {
         $("#lockscreen").modal("hide");
-    }, 500);
+        console.log("hide");
+    }, 1000);
 }
 
 // data
-var createServerLogList = (data, server_name, socketServer) => {
+var create_server_log_list = (data, server_name, socket_server) => {
     try {
         document.querySelector(`.${server_name} .server-logs`).innerHTML = "";
 
@@ -75,17 +77,17 @@ var createServerLogList = (data, server_name, socketServer) => {
             document.querySelector(`.${server_name} .server-logs`).appendChild(li);
         });
 
-        var liFields = document.querySelectorAll(`.${server_name} .file_name`);
+        var li_fields = document.querySelectorAll(`.${server_name} .file_name`);
 
-        liFields.forEach((field) => {
+        li_fields.forEach((field) => {
             field.removeEventListener("click", () => { });
 
             field.addEventListener("click", () => {
-                var request = { message: "getLog", fileName: field.innerHTML };
+                var request = { message: "get log", fileName: field.innerHTML };
 
-                showLockScreen();
+                show_lock_screen();
 
-                socketServer.send(JSON.stringify(request));
+                socket_server.send(JSON.stringify(request));
             });
         });
 
@@ -94,39 +96,39 @@ var createServerLogList = (data, server_name, socketServer) => {
     }
 };
 
-var createBandwidthData = (data, server_name) => {
+var create_bandwidth_data = (data, server_name) => {
     try {
-        var bandwidthElement = document.querySelector(`.${server_name} ul.bandwith-data`);
+        var bandwidth_element = document.querySelector(`.${server_name} ul.bandwith-data`);
 
-        var bandwidthData = data.bandwidth.data;
+        var bandwidht_data = data.bandwidth.data;
 
-        bandwidthData = bandwidthData[0];
+        bandwidht_data = bandwidht_data[0];
 
-        bandwidthElement.innerHTML = "";
+        bandwidth_element.innerHTML = "";
 
         var arr = [
-            `iface: ${bandwidthData.iface}`,
-            `ms: ${bandwidthData.ms}`,
-            `network_test_1: start: ${formatDate(bandwidthData.network_test[0].start)},
-                    end: ${formatDate(bandwidthData.network_test[0].end)},
-                    total: ${(bandwidthData.network_test[0].total)},
-                    url: ${bandwidthData.network_test[0].url}`,
-            `network_test_2: start: ${formatDate(bandwidthData.network_test[1].start)},
-                    end: ${formatDate(bandwidthData.network_test[1].end)},
-                    total: ${bandwidthData.network_test[1].total},
-                    url: ${bandwidthData.network_test[1].url}`,
-            `operstate: ${bandwidthData.operstate}`,
-            `rx_bytes: ${formatFileSize(bandwidthData.rx_bytes)}`,
-            `rx_errors: ${bandwidthData.rx_errors}`,
-            `rx_dropped: ${bandwidthData.rx_dropped}`,
-            `rx_sec: ${bandwidthData.rx_sec}`,
-            `tx_bytes: ${formatFileSize(bandwidthData.tx_bytes)}`,
-            `tx_dropped: ${bandwidthData.tx_dropped}`,
-            `tx_sec: ${bandwidthData.tx_sec}`,
-            `start: ${formatDate(data.bandwidth.start)}`,
-            `end: ${formatDate(data.bandwidth.end)}`,
+            `iface: ${bandwidht_data.iface}`,
+            `ms: ${bandwidht_data.ms}`,
+            `network_test_1: start: ${format_date(bandwidht_data.network_test[0].start)},
+                    end: ${format_date(bandwidht_data.network_test[0].end)},
+                    total: ${(bandwidht_data.network_test[0].total)},
+                    url: ${bandwidht_data.network_test[0].url}`,
+            `network_test_2: start: ${format_date(bandwidht_data.network_test[1].start)},
+                    end: ${format_date(bandwidht_data.network_test[1].end)},
+                    total: ${bandwidht_data.network_test[1].total},
+                    url: ${bandwidht_data.network_test[1].url}`,
+            `operstate: ${bandwidht_data.operstate}`,
+            `rx_bytes: ${format_file_size(bandwidht_data.rx_bytes)}`,
+            `rx_errors: ${bandwidht_data.rx_errors}`,
+            `rx_dropped: ${bandwidht_data.rx_dropped}`,
+            `rx_sec: ${bandwidht_data.rx_sec}`,
+            `tx_bytes: ${format_file_size(bandwidht_data.tx_bytes)}`,
+            `tx_dropped: ${bandwidht_data.tx_dropped}`,
+            `tx_sec: ${bandwidht_data.tx_sec}`,
+            `start: ${format_date(data.bandwidth.start)}`,
+            `end: ${format_date(data.bandwidth.end)}`,
             `status: ${data.bandwidth.status}`,
-            `time_stamp: ${formatDate(data.bandwidth.time_stamp)}`,
+            `time_stamp: ${format_date(data.bandwidth.time_stamp)}`,
         ];
 
         arr.forEach((d) => {
@@ -134,7 +136,7 @@ var createBandwidthData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            bandwidthElement.appendChild(li);
+            bandwidth_element.appendChild(li);
         });
 
     } catch (err) {
@@ -143,34 +145,34 @@ var createBandwidthData = (data, server_name) => {
 
 };
 
-var createCPUData = (data, server_name) => {
+var create_cpu_data = (data, server_name) => {
     try {
-        var cpuElement = document.querySelector(`.${server_name} ul.cpu-data`);
+        var cpu_element = document.querySelector(`.${server_name} ul.cpu-data`);
 
-        var cpuData = data.cpu.data;
+        var cpu_data = data.cpu.data;
 
-        cpuElement.innerHTML = "";
+        cpu_element.innerHTML = "";
 
         var arr = [
-            `brand: ${cpuData.brand}`,
-            `cache: ${JSON.stringify(cpuData.cache)}`,
-            `cores: ${cpuData.cores}`,
-            `family: ${cpuData.family}`,
-            `governor: ${cpuData.governor}`,
-            `manufacturer: ${cpuData.manufacturer}`,
-            `model: ${cpuData.model}`,
-            `physicalCores: ${cpuData.physicalCores}`,
-            `processors: ${cpuData.processors}`,
-            `revision: ${cpuData.revision}`,
-            `socket: ${cpuData.socket}`,
-            `speed: ${cpuData.speed}`,
-            `speedmax: ${cpuData.speedmax}`,
-            `speedmin: ${cpuData.speedmin}`,
-            `stepping: ${cpuData.stepping}`,
-            `vendor: ${cpuData.vendor}`,
-            `voltage: ${cpuData.voltage}`,
+            `brand: ${cpu_data.brand}`,
+            `cache: ${JSON.stringify(cpu_data.cache)}`,
+            `cores: ${cpu_data.cores}`,
+            `family: ${cpu_data.family}`,
+            `governor: ${cpu_data.governor}`,
+            `manufacturer: ${cpu_data.manufacturer}`,
+            `model: ${cpu_data.model}`,
+            `physicalCores: ${cpu_data.physicalCores}`,
+            `processors: ${cpu_data.processors}`,
+            `revision: ${cpu_data.revision}`,
+            `socket: ${cpu_data.socket}`,
+            `speed: ${cpu_data.speed}`,
+            `speedmax: ${cpu_data.speedmax}`,
+            `speedmin: ${cpu_data.speedmin}`,
+            `stepping: ${cpu_data.stepping}`,
+            `vendor: ${cpu_data.vendor}`,
+            `voltage: ${cpu_data.voltage}`,
             `status: ${data.cpu.status}`,
-            `time_stamp: ${formatDate(data.cpu.time_stamp)}`,
+            `time_stamp: ${format_date(data.cpu.time_stamp)}`,
         ];
 
         arr.forEach((d) => {
@@ -178,7 +180,7 @@ var createCPUData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            cpuElement.appendChild(li);
+            cpu_element.appendChild(li);
         });
 
     } catch (err) {
@@ -187,26 +189,26 @@ var createCPUData = (data, server_name) => {
 
 };
 
-var createDiskData = (data, server_name) => {
+var create_disk_data = (data, server_name) => {
     try {
-        var diskElement = document.querySelector(`.${server_name} .disk-data`);
+        var disk_element = document.querySelector(`.${server_name} .disk-data`);
 
-        var diskData = data.disk.data;
+        var disk_data = data.disk.data;
 
-        diskElement.innerHTML = "";
+        disk_element.innerHTML = "";
 
-        diskData.forEach((d) => {
+        disk_data.forEach((d) => {
             var ul = document.createElement("ul");
             var arr = [
-                `available: ${formatFileSize(d.available)}`,
+                `available: ${format_file_size(d.available)}`,
                 `fs: ${d.fs}`,
                 `mount: ${d.mount}`,
-                `size: ${formatFileSize(d.size)}`,
+                `size: ${format_file_size(d.size)}`,
                 `type: ${d.type}`,
-                `use: ${formatFileSize(d.use)}`,
-                `used: ${formatFileSize(d.used)}`,
+                `use: ${format_file_size(d.use)}`,
+                `used: ${format_file_size(d.used)}`,
                 `status: ${data.disk.status}`,
-                `time_stamp: ${formatDate(data.disk.time_stamp)}`,
+                `time_stamp: ${format_date(data.disk.time_stamp)}`,
             ]
 
             arr.forEach((d) => {
@@ -216,7 +218,7 @@ var createDiskData = (data, server_name) => {
 
                 ul.appendChild(li);
 
-                diskElement.appendChild(ul);
+                disk_element.appendChild(ul);
             });
         });
 
@@ -225,27 +227,27 @@ var createDiskData = (data, server_name) => {
     }
 };
 
-var createMemoryData = (data, server_name) => {
+var create_memory_data = (data, server_name) => {
     try {
-        var memoryElement = document.querySelector(`.${server_name} ul.memory-data`);
+        var memory_element = document.querySelector(`.${server_name} ul.memory-data`);
 
-        var memoryData = data.memory.data;
+        var memory_data = data.memory.data;
 
-        memoryElement.innerHTML = "";
+        memory_element.innerHTML = "";
 
         var arr = [
-            `active: ${formatFileSize(memoryData.active)}`,
-            `buffcache: ${formatFileSize(memoryData.buffcache)}`,
-            `buffers: ${formatFileSize(memoryData.buffers)}`,
-            `free: ${formatFileSize(memoryData.free)}`,
-            `slab: ${formatFileSize(memoryData.slab)}`,
-            `swapfree: ${formatFileSize(memoryData.swapfree)}`,
-            `swaptotal: ${formatFileSize(memoryData.swaptotal)}`,
-            `swapused: ${formatFileSize(memoryData.swapused)}`,
-            `total: ${formatFileSize(memoryData.total)}`,
-            `used: ${formatFileSize(memoryData.used)}`, 
+            `active: ${format_file_size(memory_data.active)}`,
+            `buffcache: ${format_file_size(memory_data.buffcache)}`,
+            `buffers: ${format_file_size(memory_data.buffers)}`,
+            `free: ${format_file_size(memory_data.free)}`,
+            `slab: ${format_file_size(memory_data.slab)}`,
+            `swapfree: ${format_file_size(memory_data.swapfree)}`,
+            `swaptotal: ${format_file_size(memory_data.swaptotal)}`,
+            `swapused: ${format_file_size(memory_data.swapused)}`,
+            `total: ${format_file_size(memory_data.total)}`,
+            `used: ${format_file_size(memory_data.used)}`, 
             `status: ${data.memory.status}`,
-            `time_stamp: ${formatDate(data.memory.time_stamp)}`,
+            `time_stamp: ${format_date(data.memory.time_stamp)}`,
         ];
 
         arr.forEach((d) => {
@@ -253,7 +255,7 @@ var createMemoryData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            memoryElement.appendChild(li);
+            memory_element.appendChild(li);
         });
 
     } catch (err) {
@@ -261,16 +263,16 @@ var createMemoryData = (data, server_name) => {
     }
 };
 
-var createCPUProcessData = (data, server_name) => {
+var create_cpu_process_data = (data, server_name) => {
     try {
-        var processElement = document.querySelector(`.${server_name} .process-data`);
+        var process_element = document.querySelector(`.${server_name} .process-data`);
 
-        var processData = data.process.data.list;
+        var process_data = data.process.data.list;
 
-        processElement.innerHTML = "";
+        process_element.innerHTML = "";
         
-        processData.forEach(d => {
-            var ulElement = document.createElement("ul");
+        process_data.forEach(d => {
+            var ul_element = document.createElement("ul");
             var arr = [
                 `command: ${d.command}`,
                 `mem_rss: ${d.mem_rss}`,
@@ -286,7 +288,7 @@ var createCPUProcessData = (data, server_name) => {
                 `pid: ${d.pid}`,
                 `pmem: ${precise(d.pmem)}`,
                 `priority: ${d.priority}`,
-                `started: ${formatDate(d.started)}`,
+                `started: ${format_date(d.started)}`,
                 `tty: ${d.tty}`,
                 `user: ${d.user}`,
             ];
@@ -296,9 +298,9 @@ var createCPUProcessData = (data, server_name) => {
 
                 li.innerHTML += d;
 
-                ulElement.appendChild(li);
+                ul_element.appendChild(li);
 
-                processElement.appendChild(ulElement);
+                process_element.appendChild(ul_element);
             });
         });
 
@@ -307,16 +309,16 @@ var createCPUProcessData = (data, server_name) => {
     }
 };
 
-var createUsersData = (data, server_name) => {
+var create_users_data = (data, server_name) => {
     try {
-        var usersElement = document.querySelector(`.${server_name} .users-data`);
+        var users_element = document.querySelector(`.${server_name} .users-data`);
         
-        var usersData = data.users.data;
+        var users_data = data.users.data;
         
-        usersElement.innerHTML = "";
+        users_element.innerHTML = "";
         
-        if (usersData.length) {
-            usersData.forEach(d => {
+        if (users_data.length) {
+            users_data.forEach(d => {
                 var ul = document.createElement("ul");
                 var arr = [
                     `user: ${d.user}`,
@@ -333,7 +335,7 @@ var createUsersData = (data, server_name) => {
                     
                     ul.appendChild(li);
                     
-                    usersElement.appendChild(ul);
+                    users_element.appendChild(ul);
                 });
             });
         } else {
@@ -341,7 +343,7 @@ var createUsersData = (data, server_name) => {
             
             span.innerText = "No users!"
 
-            usersElement.appendChild(span);
+            users_element.appendChild(span);
         }
 
         
@@ -350,16 +352,16 @@ var createUsersData = (data, server_name) => {
     }
 };
 
-var createUptimeData = (data, server_name) => {
+var create_machine_uptime_data = (data, server_name) => {
     try {
-        var uptimeElement = document.querySelector(`.${server_name} ul.uptime-data`);
+        var uptime_element = document.querySelector(`.${server_name} ul.uptime-data`);
 
-        uptimeElement.innerHTML = "";
+        uptime_element.innerHTML = "";
 
         var arr = [
-            `machine_uptime: ${parseMillisecondToReadabvarime(data.machine_uptime)}`,
-            `script_uptime: ${parseMillisecondToReadabvarime(data.script_uptime)}`,
-            `time_stamp: ${formatDate(data.time_stamp)}`,
+            `machine_uptime: ${parse_millisecond_to_readable_time(data.machine_uptime)}`,
+            `script_uptime: ${parse_millisecond_to_readable_time(data.script_uptime)}`,
+            `time_stamp: ${format_date(data.time_stamp)}`,
         ];
 
         arr.forEach(d => {
@@ -367,7 +369,7 @@ var createUptimeData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            uptimeElement.appendChild(li);
+            uptime_element.appendChild(li);
         });
 
     } catch (err) {
@@ -375,31 +377,31 @@ var createUptimeData = (data, server_name) => {
     }
 };
 
-var createGraphicsData = (data, server_name) => {
+var create_graphics_card_data = (data, server_name) => {
     try {
-        var graphicsElement = document.querySelector(`.${server_name} ul.graphics-data`);
+        var graphics_element = document.querySelector(`.${server_name} ul.graphics-data`);
     
-        graphicsElement.innerHTML = "";
+        graphics_element.innerHTML = "";
 
-        var graphicsData = data.graphics.data;
+        var graphics_data = data.graphics.data;
 
         var arr = [
-            `active: ${formatFileSize(graphicsData.active)}`,
-            `available: ${formatFileSize(graphicsData.available)}`,
-            `buffcache: ${formatFileSize(graphicsData.buffcache)}`,
-            `buffers: ${formatFileSize(graphicsData.buffers)}`,
-            `cached: ${formatFileSize(graphicsData.cached)}`,
-            `free: ${formatFileSize(graphicsData.free)}`,
-            `slab: ${formatFileSize(graphicsData.slab)}`,
-            `swapfree: ${formatFileSize(graphicsData.swapfree)}`,
-            `swaptotal: ${formatFileSize(graphicsData.swaptotal)}`,
-            `swapused: ${formatFileSize(graphicsData.swapused)}`,
-            `total: ${formatFileSize(graphicsData.total)}`,
-            `used: ${formatFileSize(graphicsData.used)}`,
-            `end: ${formatDate(data.graphics.end)}`,
-            `start: ${formatDate(data.graphics.start)}`,
+            `active: ${format_file_size(graphics_data.active)}`,
+            `available: ${format_file_size(graphics_data.available)}`,
+            `buffcache: ${format_file_size(graphics_data.buffcache)}`,
+            `buffers: ${format_file_size(graphics_data.buffers)}`,
+            `cached: ${format_file_size(graphics_data.cached)}`,
+            `free: ${format_file_size(graphics_data.free)}`,
+            `slab: ${format_file_size(graphics_data.slab)}`,
+            `swapfree: ${format_file_size(graphics_data.swapfree)}`,
+            `swaptotal: ${format_file_size(graphics_data.swaptotal)}`,
+            `swapused: ${format_file_size(graphics_data.swapused)}`,
+            `total: ${format_file_size(graphics_data.total)}`,
+            `used: ${format_file_size(graphics_data.used)}`,
+            `end: ${format_date(data.graphics.end)}`,
+            `start: ${format_date(data.graphics.start)}`,
             `status: ${data.graphics.status}`,
-            `time_stamp: ${formatDate(data.graphics.time_stamp)}`,
+            `time_stamp: ${format_date(data.graphics.time_stamp)}`,
         ]
 
         arr.forEach(d => {
@@ -407,7 +409,7 @@ var createGraphicsData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            graphicsElement.appendChild(li);
+            graphics_element.appendChild(li);
         })
 
     } catch (err) {
@@ -415,24 +417,24 @@ var createGraphicsData = (data, server_name) => {
     }
 };
 
-var createBaseboardData = (data, server_name) => {
+var create_base_board_data = (data, server_name) => {
     try {
-        var baseBoardElement = document.querySelector(`.${server_name} ul.baseboard-data`);
+        var base_board_element = document.querySelector(`.${server_name} ul.baseboard-data`);
     
-        baseBoardElement.innerHTML = "";
+        base_board_element.innerHTML = "";
 
-        var baseBoardData = data.baseboard.data;
+        var base_board_data = data.baseboard.data;
 
         var arr = [
-            `assetTag: ${baseBoardData.assetTag}`,
-            `manufacturer: ${baseBoardData.manufacturer}`,
-            `model: ${baseBoardData.model}`,
-            `serial: ${baseBoardData.serial}`,
-            `version: ${baseBoardData.version}`,
-            `end: ${formatDate(data.baseboard.end)}`,
-            `start: ${formatDate(data.baseboard.start)}`,
+            `assetTag: ${base_board_data.assetTag}`,
+            `manufacturer: ${base_board_data.manufacturer}`,
+            `model: ${base_board_data.model}`,
+            `serial: ${base_board_data.serial}`,
+            `version: ${base_board_data.version}`,
+            `end: ${format_date(data.baseboard.end)}`,
+            `start: ${format_date(data.baseboard.start)}`,
             `status: ${data.baseboard.status}`,
-            `time_stamp: ${formatDate(data.baseboard.time_stamp)}`,
+            `time_stamp: ${format_date(data.baseboard.time_stamp)}`,
         ];
 
         arr.forEach(d => {
@@ -440,7 +442,7 @@ var createBaseboardData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            baseBoardElement.appendChild(li);
+            base_board_element.appendChild(li);
         });
 
     } catch (err) {
@@ -448,31 +450,31 @@ var createBaseboardData = (data, server_name) => {
     }
 };
 
-var createOSData = (data, server_name) => {
+var create_os_data = (data, server_name) => {
     try {
-        var osElement = document.querySelector(`.${server_name} ul.os-data`);
+        var os_element = document.querySelector(`.${server_name} ul.os-data`);
     
-        osElement.innerHTML = "";
+        os_element.innerHTML = "";
 
-        var osData = data.os.data;
+        var os_data = data.os.data;
 
         var arr = [
-            `arch: ${osData.arch}`,
-            `build: ${osData.build}`,
-            `codename: ${osData.codename}`,
-            `codepage: ${osData.codepage}`,
-            `distro: ${osData.distro}`,
-            `fqdn: ${osData.fqdn}`,
-            `hostname: ${osData.hostname}`,
-            `logofile: ${osData.logofile}`,
-            `platform: ${osData.platform}`,
-            `release: ${osData.release}`,
-            `serial: ${osData.serial}`,
-            `servicepack: ${osData.servicepack}`,
-            `end: ${formatDate(data.os.end)}`,
-            `start: ${formatDate(data.os.start)}`,
+            `arch: ${os_data.arch}`,
+            `build: ${os_data.build}`,
+            `codename: ${os_data.codename}`,
+            `codepage: ${os_data.codepage}`,
+            `distro: ${os_data.distro}`,
+            `fqdn: ${os_data.fqdn}`,
+            `hostname: ${os_data.hostname}`,
+            `logofile: ${os_data.logofile}`,
+            `platform: ${os_data.platform}`,
+            `release: ${os_data.release}`,
+            `serial: ${os_data.serial}`,
+            `servicepack: ${os_data.servicepack}`,
+            `end: ${format_date(data.os.end)}`,
+            `start: ${format_date(data.os.start)}`,
             `status: ${data.os.status}`,
-            `time_stamp: ${formatDate(data.os.time_stamp)}`,
+            `time_stamp: ${format_date(data.os.time_stamp)}`,
         ];
 
         arr.forEach(d => {
@@ -480,7 +482,7 @@ var createOSData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            osElement.appendChild(li);
+            os_element.appendChild(li);
         });
 
     } catch (err) {
@@ -488,23 +490,23 @@ var createOSData = (data, server_name) => {
     }
 };
 
-var createBiosData = (data, server_name) => {
+var create_bios_data = (data, server_name) => {
     try {
-        var biosElement = document.querySelector(`.${server_name} ul.bios-data`);
+        var bios_element = document.querySelector(`.${server_name} ul.bios-data`);
     
-        biosElement.innerHTML = "";
+        bios_element.innerHTML = "";
 
-        var biosData = data.bios.data;
+        var bios_data = data.bios.data;
 
         var arr = [
-            `releaseDate: ${formatDate(biosData.releaseDate)}`,
-            `revision: ${biosData.revision}`,
-            `vendor: ${biosData.vendor}`,
-            `version: ${biosData.version}`,
-            `end: ${formatDate(data.bios.end)}`,
-            `start: ${formatDate(data.bios.start)}`,
+            `releaseDate: ${format_date(bios_data.releaseDate)}`,
+            `revision: ${bios_data.revision}`,
+            `vendor: ${bios_data.vendor}`,
+            `version: ${bios_data.version}`,
+            `end: ${format_date(data.bios.end)}`,
+            `start: ${format_date(data.bios.start)}`,
             `status: ${data.bios.status}`,
-            `time_stamp: ${formatDate(data.bios.time_stamp)}`,
+            `time_stamp: ${format_date(data.bios.time_stamp)}`,
         ];
 
         arr.forEach(d => {
@@ -512,7 +514,7 @@ var createBiosData = (data, server_name) => {
 
             li.innerHTML += d;
 
-            biosElement.appendChild(li);
+            bios_element.appendChild(li);
         });
 
     } catch (err) {
@@ -520,38 +522,38 @@ var createBiosData = (data, server_name) => {
     }
 };
 
-var createServerStatsList = (data, server_name) => {
+var create_server_stats_list = (data, server_name) => {
     try {
         data = JSON.parse(data);
 
-        createBandwidthData(data, server_name);
+        create_bandwidth_data(data, server_name);
 
-        createCPUData(data, server_name);
+        create_cpu_data(data, server_name);
 
-        createDiskData(data, server_name);
+        create_disk_data(data, server_name);
 
-        createMemoryData(data, server_name);
+        create_memory_data(data, server_name);
 
-        createCPUProcessData(data, server_name);
+        create_cpu_process_data(data, server_name);
 
-        createUsersData(data, server_name);
+        create_users_data(data, server_name);
 
-        createUptimeData(data, server_name);
+        create_machine_uptime_data(data, server_name);
 
-        createGraphicsData(data, server_name);
+        create_graphics_card_data(data, server_name);
 
-        createBaseboardData(data, server_name);
+        create_base_board_data(data, server_name);
 
-        createOSData(data, server_name);
+        create_os_data(data, server_name);
 
-        createBiosData(data, server_name);
+        create_bios_data(data, server_name);
 
     } catch (err) {
         console.error(err);
     }
 }
 
-var createServerTimeline = (data, socketServer) => {
+var create_server_timeline = (data, socketServer) => {
     try {
         var timeLineElement = document.querySelector("#timeline");
 
@@ -568,9 +570,9 @@ var createServerTimeline = (data, socketServer) => {
         $("#timeline").off("change");
 
         $("#timeline").bind("change", () => {
-            var request = { message: "getTimeline", fileName: timeLineElement.value };
+            var request = { message: "get timeline", fileName: timeLineElement.value };
 
-            showLockScreen();
+            show_lock_screen();
 
             socketServer.send(JSON.stringify(request));
         });
@@ -580,67 +582,61 @@ var createServerTimeline = (data, socketServer) => {
     }
 };
 
-var setServerStatus = (server_name, status) => {
+var set_server_status = (server_name, status) => {
     var element = document.querySelector(`.${server_name} .server-status`);
 
     element.innerHTML = `<p style='color: ${status == "online" ? "green" : "red"};'>${status}</p>`;
 };
 
-var setLogDataValue = (data) => {
+var set_log_data_value = (data) => {
     document.querySelector(".log-data").innerHTML = data;
 }
 
-var startServer = (server) => {
+var start_server = (server) => {
     try {
         var log_timer = 0;
         var reconnect_timer = 0;
-        var socketServer = new WebSocket(server.url);
+        var socket_server = new WebSocket(server.url);
         var stats_timer = 0;
         var timeline_timer = 0;
 
-        var getLogs = () => {
+        var get_logs = () => {
             var timeout = 300000;
 
-            showLockScreen();
+            show_lock_screen();
 
-            if (socketServer.readyState == socketServer.OPEN) {
-                var request = { message: "getLogs" }
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get logs" }
 
-                socketServer.send(JSON.stringify(request));
+                socket_server.send(JSON.stringify(request));
             }
 
-            log_timer = setTimeout(getLogs, timeout);
+            log_timer = setTimeout(get_logs, timeout);
         }
 
-        var getServerStats = () => {
+        var get_server_stats = () => {
             var timeout = 300000;
 
-            showLockScreen();
+            show_lock_screen();
 
-            if (socketServer.readyState == socketServer.OPEN) {
-                var request = { message: "getServerStats" }
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get stats" }
 
-                socketServer.send(JSON.stringify(request));
+                socket_server.send(JSON.stringify(request));
             }
 
-            log_timer = setTimeout(getServerStats, timeout);
+            log_timer = setTimeout(get_server_stats, timeout);
         }
 
-        var cancelGetLogs = () => {
+        var cancel_get_logs = () => {
             if (log_timer) {
                 clearTimeout(log_timer);
             }
         }
 
-        var cancelGetServerStats = () => {
+        var cancel_get_server_stats = () => {
             if (stats_timer) {
                 clearTimeout(stats_timer);
-            }
-        }
-
-        var cancelGetServerTimeline = () => {
-            if (timeline_timer) {
-                clearTimeout(timeline_timer);
             }
         }
 
@@ -648,59 +644,57 @@ var startServer = (server) => {
             var timeout = 60000;
 
             reconnect_timer = setTimeout(() => {
-                startServer(server);
+                start_server(server);
             }, timeout);
         }
 
-        socketServer.onopen = () => {
-            setServerStatus(server.server_name, "online");
+        socket_server.onopen = () => {
+            set_server_status(server.server_name, "online");
             
-            getServerStats();
+            get_server_stats();
 
-            getLogs();
+            get_logs();
         }
 
-        socketServer.onmessage = (event) => {
-            serverResponse = JSON.parse(event.data);
+        socket_server.onmessage = (event) => {
+            var server_response = JSON.parse(event.data);
 
-            if (serverResponse) {
-                if (serverResponse.hasOwnProperty("logs")) {
-                    createServerLogList(serverResponse, server.server_name, socketServer);
+            if (server_response) {
+                if (server_response.hasOwnProperty("logs")) {
+                    create_server_log_list(server_response, server.server_name, socket_server);
 
-                    createServerTimeline(serverResponse, socketServer);
+                    create_server_timeline(server_response, socket_server);
                 }
 
-                if (serverResponse.hasOwnProperty("log")) {
-                    setLogDataValue(serverResponse.log);
+                if (server_response.hasOwnProperty("log")) {
+                    set_log_data_value(server_response.log);
                 }
 
-                if (serverResponse.hasOwnProperty("timeline")) {
-                    createServerStatsList(serverResponse.timeline, server.server_name);
+                if (server_response.hasOwnProperty("timeline")) {
+                    create_server_stats_list(server_response.timeline, server.server_name);
                 }
 
-                if (serverResponse.hasOwnProperty("server_statistics")) {
-                    createServerStatsList(serverResponse.server_statistics, server.server_name);
+                if (server_response.hasOwnProperty("server_statistics")) {
+                    create_server_stats_list(server_response.server_statistics, server.server_name);
                 }
 
             }
 
-            hideLockScreen();
+            hide_lock_screen();
         }
 
-        socketServer.onerror = (event) => {
+        socket_server.onerror = (event) => {
             console.error("Error: ", event);
 
-            setServerStatus(server.server_name, "offline");
+            set_server_status(server.server_name, "offline");
         }
 
-        socketServer.onclose = () => {
-            cancelGetServerStats();
+        socket_server.onclose = () => {
+            set_server_status(server.server_name, "offline");
 
-            cancelGetServerTimeline();
+            cancel_get_server_stats();
 
-            cancelGetLogs();
-
-            setServerStatus(server.server_name, "offline");
+            cancel_get_logs();
 
             reconnect();
         }
@@ -710,10 +704,10 @@ var startServer = (server) => {
     }
 }
 
-var startWebsocketServers = async (serverManifest) => {
+var start_websocket_servers = async (serverManifest) => {
     try {
         Object.values(serverManifest.servers).forEach(async (server) => {
-            startServer(server);
+            start_server(server);
         });
 
     } catch (err) {
@@ -731,7 +725,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             res.json().then((data) => {
-                startWebsocketServers(data);
+                start_websocket_servers(data);
             });
 
         });
