@@ -36,7 +36,6 @@ var get_log_data = (file_name, message) => {
 			config.cache.push({ log_file_id: file_name, content: log });
 		}
 
-
 		switch (message) {
 			case 'get log':
 				result = { log };
@@ -95,33 +94,33 @@ var get_server_statistics = () => {
 };
 
 // Events
-wss.on("connection", (ws) => {
-	ws.on("message", (request) => {
+wss.on("connection", (socket) => {
+	socket.on("message", (request) => {
 		try {
 			request = JSON.parse(request);
 
 			if (request.message === "get stats") {
 				var statistics = get_server_statistics();
 
-				ws.send(statistics);
+				socket.send(statistics);
 			}
 			
 			if (request.message === "get logs") {
 				var logs = get_logs();
 
-				ws.send(logs);
+				socket.send(logs);
 			}
 
 			if (request.message === "get log" && request.fileName) {
 				var log = get_log_data(request.fileName, request.message);
 
-				ws.send(log);
+				socket.send(log);
 			}
 
 			if (request.message === "get timeline" && request.fileName) {
 				var timeLinedata = get_log_data(request.fileName, request.message);
 
-				ws.send(timeLinedata);
+				socket.send(timeLinedata);
 			}
 
 		} catch (err) {
