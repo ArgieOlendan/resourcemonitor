@@ -29,7 +29,7 @@ var get_network_graph_data = () => {
 		var result;
 
 		logs.slice(-10).forEach(file_name => {
-			content = _fs.readdirSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
+			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
 
 			content = JSON.parse(content);
 			
@@ -91,31 +91,35 @@ var get_process_graph_data = () => {
 var get_memory_graph_data = () => {
 	try {
 		var graph_data = {
-			labels: [],
-			all: {data: []},
-			running: {data: []},
-			sleeping: { data: []},
+			data: [],
+			labels: ["free", "used", "active"],
+			swap_data: [],
+			swap_labels: ["swaptotal", "swapused", "swapfree"]
 		};
 		var content;
 		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 		var result;
 
-		logs.slice(-60).forEach(file_name => {
+		logs.slice(-1).forEach(file_name => {
 			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
 
 			content = JSON.parse(content);
-			
-			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
 
-			graph_data.all.data.push(content.process.data.all);
+			graph_data.data.push(content.memory.data.free);
 
-			graph_data.running.data.push(content.process.data.running);
+			graph_data.data.push(content.memory.data.used);
 
-			graph_data.sleeping.data.push(content.process.data.sleeping);
+			graph_data.data.push(content.memory.data.active);
+
+			graph_data.swap_data.push(content.memory.data.swaptotal);
+
+			graph_data.swap_data.push(content.memory.data.swapused);
+
+			graph_data.swap_data.push(content.memory.data.swapfree);
 
 		});
 
-		result = { process_graph: graph_data }
+		result = { memory_graph: graph_data }
 
 		result = JSON.stringify(result);
 
@@ -239,6 +243,12 @@ wss.on("connection", (socket) => {
 
 			if (request.message === "get_process_graph") {
 				var graph_data = get_process_graph_data();
+
+				socket.send(graph_data);
+			}
+
+			if (request.message === "get_memory_graph") {
+				var graph_data = get_memory_graph_data();
 
 				socket.send(graph_data);
 			}
@@ -945,4 +955,4 @@ var sleep = (ms) => {
 };
 
 // Run script
-// run();
+run();

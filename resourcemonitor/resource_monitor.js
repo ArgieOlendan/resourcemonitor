@@ -81,7 +81,7 @@ var create_server_log_list = (data, server_name, socket_server) => {
             field.removeEventListener("click", () => { });
 
             field.addEventListener("click", () => {
-                var request = { message: "get log", fileName: field.innerHTML };
+                var request = { message: "get_log", fileName: field.innerHTML };
 
                 show_lock_screen();
 
@@ -243,7 +243,7 @@ var create_memory_data = (data, server_name) => {
             `swaptotal: ${format_file_size(memory_data.swaptotal)}`,
             `swapused: ${format_file_size(memory_data.swapused)}`,
             `total: ${format_file_size(memory_data.total)}`,
-            `used: ${format_file_size(memory_data.used)}`, 
+            `used: ${format_file_size(memory_data.used)}`,
             `status: ${data.memory.status}`,
             `time_stamp: ${format_date(data.memory.time_stamp)}`,
         ];
@@ -268,7 +268,7 @@ var create_cpu_process_data = (data, server_name) => {
         var process_data = data.process.data.list;
 
         process_element.innerHTML = "";
-        
+
         process_data.forEach(d => {
             var ul_element = document.createElement("ul");
             var arr = [
@@ -310,11 +310,11 @@ var create_cpu_process_data = (data, server_name) => {
 var create_users_data = (data, server_name) => {
     try {
         var users_element = document.querySelector(`.${server_name} .users-data`);
-        
+
         var users_data = data.users.data;
-        
+
         users_element.innerHTML = "";
-        
+
         if (users_data.length) {
             users_data.forEach(d => {
                 var ul = document.createElement("ul");
@@ -325,26 +325,26 @@ var create_users_data = (data, server_name) => {
                     `ip: ${d.ip}`,
                     `command: ${d.command}`,
                 ];
-                
+
                 arr.forEach(d => {
                     var li = document.createElement("li");
-                    
+
                     li.innerHTML += d;
-                    
+
                     ul.appendChild(li);
-                    
+
                     users_element.appendChild(ul);
                 });
             });
         } else {
             var span = document.createElement("span");
-            
+
             span.innerText = "No users!"
 
             users_element.appendChild(span);
         }
 
-        
+
     } catch (err) {
         console.error(err);
     }
@@ -378,7 +378,7 @@ var create_machine_uptime_data = (data, server_name) => {
 var create_graphics_card_data = (data, server_name) => {
     try {
         var graphics_element = document.querySelector(`.${server_name} ul.graphics-data`);
-    
+
         graphics_element.innerHTML = "";
 
         var graphics_data = data.graphics.data;
@@ -418,7 +418,7 @@ var create_graphics_card_data = (data, server_name) => {
 var create_base_board_data = (data, server_name) => {
     try {
         var base_board_element = document.querySelector(`.${server_name} ul.baseboard-data`);
-    
+
         base_board_element.innerHTML = "";
 
         var base_board_data = data.baseboard.data;
@@ -451,7 +451,7 @@ var create_base_board_data = (data, server_name) => {
 var create_os_data = (data, server_name) => {
     try {
         var os_element = document.querySelector(`.${server_name} ul.os-data`);
-    
+
         os_element.innerHTML = "";
 
         var os_data = data.os.data;
@@ -484,14 +484,14 @@ var create_os_data = (data, server_name) => {
         });
 
     } catch (err) {
-       console.error(err);
+        console.error(err);
     }
 };
 
 var create_bios_data = (data, server_name) => {
     try {
         var bios_element = document.querySelector(`.${server_name} ul.bios-data`);
-    
+
         bios_element.innerHTML = "";
 
         var bios_data = data.bios.data;
@@ -556,7 +556,7 @@ var create_server_timeline = (data, socketServer) => {
         var timeline_element = document.querySelector("#timeline");
 
         timeline_element.innerHTML = "";
-        
+
         data.logs.forEach(log => {
             var option = document.createElement("option");
 
@@ -568,7 +568,7 @@ var create_server_timeline = (data, socketServer) => {
         $("#timeline").off("change");
 
         $("#timeline").bind("change", () => {
-            var request = { message: "get timeline", fileName: timeline_element.value };
+            var request = { message: "get_timeline", fileName: timeline_element.value };
 
             show_lock_screen();
 
@@ -578,6 +578,82 @@ var create_server_timeline = (data, socketServer) => {
     } catch (err) {
         console.error(err);
     }
+};
+
+var render_memory_graph = (memory_graph, labels, selector) => {
+    var ctx = document.getElementById(selector).getContext('2d');
+
+    new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "free",
+                data: memory_graph.data,
+                backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"]
+            }]
+        },
+        options: {
+            title: {
+              display: true,
+              text: 'Memory statistics'
+            }
+        }
+    })
+};
+
+var render_network_graph = (data, labels, selector) => {
+    var ctx = document.getElementById(selector).getContext('2d');
+
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "ms",
+                data: data,
+                borderColor: "#3e95cd",
+                fill: false
+            }]
+        },
+        options: {
+            title: {
+              display: true,
+              text: 'Network Test in Milliseconds'
+            }
+        }
+    });
+};
+
+var render_process_graph = (process_graph, labels, selector) => {
+    var ctx = document.getElementById(selector).getContext('2d');
+
+    new Chart(ctx, {
+        type: "horizontalBar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "number of process",
+                data: process_graph.all.data,
+                backgroundColor: '#3e95cd',
+            },{
+                label: "number of running process",
+                data: process_graph.running.data,
+                backgroundColor: '#8e5ea2',
+            },{
+                label: "number of sleeping process",
+                data: process_graph.sleeping.data,
+                backgroundColor: '#3cba9f',
+            }]
+        },
+        options: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'CPU PROCESSES'
+            }
+        }
+    })
 };
 
 var set_server_status = (server_name, status) => {
@@ -592,19 +668,27 @@ var set_log_data_value = (data) => {
 
 var start_server = (server) => {
     try {
+        var socket_server = new WebSocket(server.url);
+
+        // Server Data Timers
         var log_timer = 0;
         var reconnect_timer = 0;
-        var socket_server = new WebSocket(server.url);
         var stats_timer = 0;
 
+        // Graph Timers
+        var network_graph_timer = 0;
+        var process_graph_timer = 0;
+        var memory_graph_timer = 0;
+
+        // Server data
         var get_logs = () => {
-            var timeout = 180000;
+            var timeout = 120000;
 
             if (socket_server.readyState == socket_server.OPEN) {
-                var request = { message: "get logs" };
+                var request = { message: "get_logs" }
 
                 show_lock_screen();
-                
+
                 socket_server.send(JSON.stringify(request));
             }
 
@@ -615,7 +699,7 @@ var start_server = (server) => {
             var timeout = 60000;
 
             if (socket_server.readyState == socket_server.OPEN) {
-                var request = { message: "get stats" };
+                var request = { message: "get_stats" }
 
                 show_lock_screen();
 
@@ -625,6 +709,49 @@ var start_server = (server) => {
             stats_timer = setTimeout(get_server_stats, timeout);
         }
 
+        // Graphs
+        var get_memory_graph = () => {
+            var timeout = 600000;
+
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get_memory_graph" }
+
+                show_lock_screen();
+
+                socket_server.send(JSON.stringify(request));
+            }
+
+            network_graph_timer = setTimeout(get_logs, timeout);
+        };
+
+        var get_network_graph = () => {
+            var timeout = 600000;
+
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get_network_graph" }
+
+                show_lock_screen();
+
+                socket_server.send(JSON.stringify(request));
+            }
+
+            network_graph_timer = setTimeout(get_logs, timeout);
+        };
+
+        var get_process_graph = () => {
+            var timeout = 600000;
+
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get_process_graph" }
+
+                show_lock_screen();
+
+                socket_server.send(JSON.stringify(request));
+            }
+
+            process_graph_timer = setTimeout(get_logs, timeout);
+        }
+
         var reconnect = () => {
             var timeout = 30000;
 
@@ -632,22 +759,32 @@ var start_server = (server) => {
                 start_server(server);
             }, timeout);
         }
-        
-        var cancel_get_logs = () => {
-            if (log_timer) {
-                clearTimeout(log_timer);
-            }
-        }
-
-        var cancel_get_server_stats = () => {
-            if (stats_timer) {
-                clearTimeout(stats_timer);
-            }
-        }
 
         var cancel_reconnect = () => {
             if (reconnect_timer) {
                 clearTimeout(reconnect_timer);
+            }
+        };
+
+        var cancel_socket_request = () => {
+            if (log_timer) {
+                clearTimeout(log_timer);
+            }
+
+            if (stats_timer) {
+                clearTimeout(stats_timer);
+            }
+
+            if (network_graph_timer) {
+                clearTimeout(network_graph_timer);
+            }
+
+            if (process_graph_timer) {
+                clearTimeout(process_graph_timer);
+            }
+
+            if (memory_graph_timer) {
+                clearTimeout(memory_graph_timer);
             }
         }
 
@@ -655,10 +792,16 @@ var start_server = (server) => {
             cancel_reconnect();
 
             set_server_status(server.server_name, "online");
-            
+
             get_server_stats();
 
             get_logs();
+
+            get_memory_graph();
+
+            get_network_graph();
+
+            get_process_graph();
         }
 
         socket_server.onmessage = (event) => {
@@ -691,7 +834,27 @@ var start_server = (server) => {
                     hide_lock_screen();
                 }
 
+                if (server_response.hasOwnProperty("network_graph")) {
+                    render_network_graph(server_response.network_graph.data, server_response.network_graph.labels, "network-graph");
+
+                    hide_lock_screen();
+                }
+
+                if (server_response.hasOwnProperty("process_graph")) {
+                    render_process_graph(server_response.process_graph, server_response.process_graph.labels, "cpu-graph");
+
+                    hide_lock_screen();
+                }
+
+                if (server_response.hasOwnProperty("memory_graph")) {
+                    render_memory_graph(server_response.memory_graph, server_response.memory_graph.labels, "memory-graph");
+
+                    hide_lock_screen();
+                }
+
+                hide_lock_screen();
             }
+
         }
 
         socket_server.onerror = (event) => {
@@ -703,9 +866,7 @@ var start_server = (server) => {
         socket_server.onclose = () => {
             set_server_status(server.server_name, "offline");
 
-            cancel_get_server_stats();
-
-            cancel_get_logs();
+            cancel_socket_request();
 
             reconnect();
         }
