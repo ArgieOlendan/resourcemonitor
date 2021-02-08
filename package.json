@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "moment": "^2.29.1",
     "systeminformation": "^4.34.2",
     "ws": "^7.4.2"
   }

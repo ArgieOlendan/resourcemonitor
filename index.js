@@ -5,6 +5,7 @@ var _process = require("process");
 var http = require("http");
 var si = require("systeminformation");
 var WebSocket = require('ws');
+var moment = require("moment");
 
 var config = {
 	cache: [],
@@ -20,6 +21,111 @@ var config = {
 var wss = new WebSocket.Server({ port: config.port });
 
 // Server
+var get_network_graph_data = () => {
+	try {
+		var graph_data = { labels: [], data: [] };
+		var content;
+		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var result;
+
+		logs.slice(-10).forEach(file_name => {
+			content = _fs.readdirSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
+
+			content = JSON.parse(content);
+			
+			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
+
+			graph_data.data.push(content.bandwidth.data[0].network_test[0].total);
+
+		});
+
+		result = { network_graph: graph_data }
+
+		result = JSON.stringify(result);
+
+		return result;
+		
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+var get_process_graph_data = () => {
+	try {
+		var graph_data = {
+			labels: [],
+			all: {data: []},
+			running: {data: []},
+			sleeping: { data: []},
+		};
+		var content;
+		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var result;
+
+		logs.slice(-10).forEach(file_name => {
+			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
+
+			content = JSON.parse(content);
+			
+			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
+
+			graph_data.all.data.push(content.process.data.all);
+
+			graph_data.running.data.push(content.process.data.running);
+
+			graph_data.sleeping.data.push(content.process.data.sleeping);
+
+		});
+
+		result = { process_graph: graph_data }
+
+		result = JSON.stringify(result);
+
+		return result;
+		
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+var get_memory_graph_data = () => {
+	try {
+		var graph_data = {
+			labels: [],
+			all: {data: []},
+			running: {data: []},
+			sleeping: { data: []},
+		};
+		var content;
+		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var result;
+
+		logs.slice(-60).forEach(file_name => {
+			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
+
+			content = JSON.parse(content);
+			
+			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
+
+			graph_data.all.data.push(content.process.data.all);
+
+			graph_data.running.data.push(content.process.data.running);
+
+			graph_data.sleeping.data.push(content.process.data.sleeping);
+
+		});
+
+		result = { process_graph: graph_data }
+
+		result = JSON.stringify(result);
+
+		return result;
+		
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 var get_log_data = (file_name, message) => {
 	try {
 		var cached_data = config.cache.filter(cd => {
@@ -99,28 +205,42 @@ wss.on("connection", (socket) => {
 		try {
 			request = JSON.parse(request);
 
-			if (request.message === "get stats") {
+			// Sever data
+			if (request.message === "get_stats") {
 				var statistics = get_server_statistics();
 
 				socket.send(statistics);
 			}
 			
-			if (request.message === "get logs") {
+			if (request.message === "get_logs") {
 				var logs = get_logs();
 
 				socket.send(logs);
 			}
 
-			if (request.message === "get log" && request.fileName) {
+			if (request.message === "get_log" && request.fileName) {
 				var log = get_log_data(request.fileName, request.message);
 
 				socket.send(log);
 			}
 
-			if (request.message === "get timeline" && request.fileName) {
+			if (request.message === "get_timeline" && request.fileName) {
 				var timeLinedata = get_log_data(request.fileName, request.message);
 
 				socket.send(timeLinedata);
+			}
+
+			// Graphs
+			if (request.message === "get_network_graph") {
+				var graph_data = get_network_graph_data();
+
+				socket.send(graph_data);
+			}
+
+			if (request.message === "get_process_graph") {
+				var graph_data = get_process_graph_data();
+
+				socket.send(graph_data);
 			}
 
 		} catch (err) {
@@ -409,11 +529,15 @@ var cpu = async () => {
 				si.cpuTemperature().then((cpu_temperature_data) => {
 					cpu_data = Object.assign({}, cpu_data, { "cput_temperature": cpu_temperature_data });
 
-					status = true
-	
-					end = new Date().toISOString();
-	
-					resolve();
+					si.cpuCurrentspeed().then((cpu_speed_data) => {
+						cpu_data = Object.assign({}, cpu_data, { "cpu_speed_data": cpu_speed_data });
+
+						status = true
+		
+						end = new Date().toISOString();
+
+						resolve();
+					});
 				});
 
 			})
@@ -821,4 +945,4 @@ var sleep = (ms) => {
 };
 
 // Run script
-run();
+// run();
