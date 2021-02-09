@@ -580,6 +580,28 @@ var create_server_timeline = (data, socketServer) => {
     }
 };
 
+var render_graphics_graph = (memory_graph, labels, selector) => {
+    var ctx = document.getElementById(selector).getContext('2d');
+
+    new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "graphics data",
+                data: memory_graph.data,
+                backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"]
+            }]
+        },
+        options: {
+            title: {
+              display: true,
+              text: 'Graphics Memory statistics'
+            }
+        }
+    })
+};
+
 var render_memory_graph = (memory_graph, labels, selector) => {
     var ctx = document.getElementById(selector).getContext('2d');
 
@@ -588,7 +610,7 @@ var render_memory_graph = (memory_graph, labels, selector) => {
         data: {
             labels: labels,
             datasets: [{
-                label: "free",
+                label: "memory data",
                 data: memory_graph.data,
                 backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"]
             }]
@@ -602,7 +624,7 @@ var render_memory_graph = (memory_graph, labels, selector) => {
     })
 };
 
-var render_network_graph = (data, labels, selector) => {
+var render_network_graph = (network_graph, labels, selector) => {
     var ctx = document.getElementById(selector).getContext('2d');
 
     new Chart(ctx, {
@@ -610,10 +632,21 @@ var render_network_graph = (data, labels, selector) => {
         data: {
             labels: labels,
             datasets: [{
-                label: "ms",
-                data: data,
-                borderColor: "#3e95cd",
-                fill: false
+                label: "network test 1",
+                data: network_graph.test_1,
+                fill: true,
+                backgroundColor: "rgba(255,99,132,0.2)",
+                borderColor: "rgba(255,99,132,1)",
+                pointBorderColor: "#fff",
+                pointBackgroundColor: "rgba(255,99,132,1)",
+            },{
+                label: "network test 2",
+                data: network_graph.test_2,
+                fill: true,
+                backgroundColor: "rgba(179,181,198,0.2)",
+                borderColor: "rgba(179,181,198,1)",
+                pointBorderColor: "#fff",
+                pointBackgroundColor: "rgba(179,181,198,1)",
             }]
         },
         options: {
@@ -676,13 +709,14 @@ var start_server = (server) => {
         var stats_timer = 0;
 
         // Graph Timers
+        var graphics_graph_timer = 0;
         var network_graph_timer = 0;
-        var process_graph_timer = 0;
         var memory_graph_timer = 0;
+        var process_graph_timer = 0;
 
         // Server data
         var get_logs = () => {
-            var timeout = 120000;
+            var timeout = 180000;
 
             if (socket_server.readyState == socket_server.OPEN) {
                 var request = { message: "get_logs" }
@@ -710,6 +744,20 @@ var start_server = (server) => {
         }
 
         // Graphs
+        var get_graphics_graph = () => {
+            var timeout = 600000;
+
+            if (socket_server.readyState == socket_server.OPEN) {
+                var request = { message: "get_graphics_graph" }
+
+                show_lock_screen();
+
+                socket_server.send(JSON.stringify(request));
+            }
+
+            graphics_graph_timer = setTimeout(get_graphics_graph, timeout);
+        };
+
         var get_memory_graph = () => {
             var timeout = 600000;
 
@@ -721,7 +769,7 @@ var start_server = (server) => {
                 socket_server.send(JSON.stringify(request));
             }
 
-            network_graph_timer = setTimeout(get_logs, timeout);
+            memory_graph_timer = setTimeout(get_memory_graph, timeout);
         };
 
         var get_network_graph = () => {
@@ -735,7 +783,7 @@ var start_server = (server) => {
                 socket_server.send(JSON.stringify(request));
             }
 
-            network_graph_timer = setTimeout(get_logs, timeout);
+            network_graph_timer = setTimeout(get_network_graph, timeout);
         };
 
         var get_process_graph = () => {
@@ -749,7 +797,7 @@ var start_server = (server) => {
                 socket_server.send(JSON.stringify(request));
             }
 
-            process_graph_timer = setTimeout(get_logs, timeout);
+            process_graph_timer = setTimeout(get_process_graph, timeout);
         }
 
         var reconnect = () => {
@@ -796,6 +844,8 @@ var start_server = (server) => {
             get_server_stats();
 
             get_logs();
+            
+            get_graphics_graph();
 
             get_memory_graph();
 
@@ -808,6 +858,7 @@ var start_server = (server) => {
             var server_response = JSON.parse(event.data);
 
             if (server_response) {
+                // Server data
                 if (server_response.hasOwnProperty("logs")) {
                     create_server_log_list(server_response, server.server_name, socket_server);
 
@@ -834,8 +885,16 @@ var start_server = (server) => {
                     hide_lock_screen();
                 }
 
+                // Graphs
+
+                if (server_response.hasOwnProperty("graphics_graph")) {
+                    render_graphics_graph(server_response.graphics_graph, server_response.graphics_graph.labels, "graphics-graph");
+
+                    hide_lock_screen();
+                }
+
                 if (server_response.hasOwnProperty("network_graph")) {
-                    render_network_graph(server_response.network_graph.data, server_response.network_graph.labels, "network-graph");
+                    render_network_graph(server_response.network_graph, server_response.network_graph.labels, "network-graph");
 
                     hide_lock_screen();
                 }

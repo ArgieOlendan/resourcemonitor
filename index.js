@@ -21,25 +21,38 @@ var config = {
 var wss = new WebSocket.Server({ port: config.port });
 
 // Server
-var get_network_graph_data = () => {
+var get_graphics_graph_data = () => {
 	try {
-		var graph_data = { labels: [], data: [] };
+		var graph_data = {
+			data: [],
+			labels: ["free", "used", "active"],
+			swap_data: [],
+			swap_labels: ["swaptotal", "swapused", "swapfree"]
+		};
 		var content;
 		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 		var result;
 
-		logs.slice(-10).forEach(file_name => {
+		logs.slice(-1).forEach(file_name => {
 			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
 
 			content = JSON.parse(content);
-			
-			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
 
-			graph_data.data.push(content.bandwidth.data[0].network_test[0].total);
+			graph_data.data.push(content.graphics.data.free);
+
+			graph_data.data.push(content.graphics.data.used);
+
+			graph_data.data.push(content.graphics.data.active);
+
+			graph_data.swap_data.push(content.graphics.data.swaptotal);
+
+			graph_data.swap_data.push(content.graphics.data.swapused);
+
+			graph_data.swap_data.push(content.graphics.data.swapfree);
 
 		});
 
-		result = { network_graph: graph_data }
+		result = { graphics_graph: graph_data }
 
 		result = JSON.stringify(result);
 
@@ -50,14 +63,9 @@ var get_network_graph_data = () => {
 	}
 };
 
-var get_process_graph_data = () => {
+var get_network_graph_data = () => {
 	try {
-		var graph_data = {
-			labels: [],
-			all: {data: []},
-			running: {data: []},
-			sleeping: { data: []},
-		};
+		var graph_data = { labels: [] ,test_1: [] ,test_2: [] };
 		var content;
 		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
 		var result;
@@ -69,15 +77,13 @@ var get_process_graph_data = () => {
 			
 			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
 
-			graph_data.all.data.push(content.process.data.all);
+			graph_data.test_1.push(content.bandwidth.data[0].network_test[0].total);
 
-			graph_data.running.data.push(content.process.data.running);
-
-			graph_data.sleeping.data.push(content.process.data.sleeping);
+			graph_data.test_2.push(content.bandwidth.data[0].network_test[1].total);
 
 		});
 
-		result = { process_graph: graph_data }
+		result = { network_graph: graph_data }
 
 		result = JSON.stringify(result);
 
@@ -130,6 +136,44 @@ var get_memory_graph_data = () => {
 	}
 };
 
+var get_process_graph_data = () => {
+	try {
+		var graph_data = {
+			labels: [],
+			all: {data: []},
+			running: {data: []},
+			sleeping: { data: []},
+		};
+		var content;
+		var logs = _fs.readdirSync(config.logs_path, (err, fileNames) => { return fileNames });
+		var result;
+
+		logs.slice(-10).forEach(file_name => {
+			content = _fs.readFileSync(config.logs_path + `/${file_name}`, "utf-8", (err, fileData) => { return fileData});
+
+			content = JSON.parse(content);
+			
+			graph_data.labels.push(moment(content.bandwidth.time_stamp).format("hh:mm:ss a"));
+
+			graph_data.all.data.push(content.process.data.all);
+
+			graph_data.running.data.push(content.process.data.running);
+
+			graph_data.sleeping.data.push(content.process.data.sleeping);
+
+		});
+
+		result = { process_graph: graph_data }
+
+		result = JSON.stringify(result);
+
+		return result;
+		
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 var get_log_data = (file_name, message) => {
 	try {
 		var cached_data = config.cache.filter(cd => {
@@ -147,11 +191,11 @@ var get_log_data = (file_name, message) => {
 		}
 
 		switch (message) {
-			case 'get log':
+			case 'get_log':
 				result = { log };
 
 				break;
-			case 'get timeline':
+			case 'get_timeline':
 				result = { timeline: log };
 
 				break;
@@ -235,6 +279,12 @@ wss.on("connection", (socket) => {
 			}
 
 			// Graphs
+			if (request.message === "get_graphics_graph") {
+				var graph_data = get_graphics_graph_data();
+
+				socket.send(graph_data);
+			}
+
 			if (request.message === "get_network_graph") {
 				var graph_data = get_network_graph_data();
 
@@ -955,4 +1005,4 @@ var sleep = (ms) => {
 };
 
 // Run script
-run();
+// run();
